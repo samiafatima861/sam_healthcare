@@ -1,0 +1,124 @@
+.wrap {
+  position: relative;
+  margin-top: -60px;
+  padding: 0 24px;
+}
+
+.card {
+  background: var(--white);
+   /* background: var(--brand-cyan); */
+  border: 1px solid var(--border-gray);
+  border-radius: var(--radius-card);
+  padding: 32px;
+}
+
+.heading {
+  text-align: center;
+  font-size: var(--fs-lg);
+  margin-bottom: 24px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 20px;
+}
+
+.itemTop {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.item {
+  background: var(--brand-100);
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--border-gray);
+  border-radius: var(--radius-sm);
+  transition: border-color 0.15s var(--ease-standard), transform 0.15s var(--ease-standard);
+}
+
+
+
+.item:hover {
+  border-color: var(--brand-accent);
+  transform: translateY(-3px);
+}
+
+.iconWrap {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-sm);
+  background: var(--brand-100);
+  color: var(--brand-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.itemText {
+    min-width: 0;
+}
+
+.itemTitle {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.itemDesc {
+  font-size: var(--fs-2xs);
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.arrow {
+  margin-top: 8px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--brand-100);
+  color: var(--brand-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s var(--ease-standard), color 0.15s var(--ease-standard);
+}
+
+.itemDesc {
+  font-size: var(--fs-2xs);
+  color: var(--text-secondary);
+  line-height: 1.4;
+  min-height: 2.8em;
+}
+
+.item:hover .arrow {
+  background: var(--brand-accent);
+  color: var(--white);
+}
+
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .wrap {
+    margin-top: -32px;
+  }
+
+  .card {
+    padding: 24px 20px;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}

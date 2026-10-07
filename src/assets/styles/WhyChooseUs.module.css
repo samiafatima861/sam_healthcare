@@ -1,0 +1,183 @@
+.section {
+  padding: 60px 0;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr 0.9fr;
+  gap: 32px;
+  align-items: stretch;
+}
+
+.photoWrap {
+  position: relative;
+}
+
+.photo {
+  height: 100%;
+  min-height: 340px;
+  border-radius: var(--radius-card);
+  background-size: cover;
+  background-position: center;
+  background-color: var(--bg-light);
+}
+
+.missionBadge {
+  position: absolute;
+  left: 20px;
+  bottom: -24px;
+  right: 20px;
+  background: var(--brand-accent);
+  border-radius: var(--radius-sm);
+  padding: 16px 18px;
+}
+
+.missionLabel {
+  font-size: var(--fs-2xs);
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.missionText {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--white);
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  padding-top: 4px;
+}
+
+.title {
+  font-size: var(--fs-2xl);
+  color: var(--text-primary);
+}
+
+.titleAccent {
+  color: var(--brand-accent);
+}
+
+.subtitle {
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-top: 12px;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: var(--fs-sm);
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.checkIcon {
+  color: var(--brand-accent);
+  flex-shrink: 0;
+}
+
+.learnMore {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 28px;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+  padding: 12px 22px;
+  border: 1px solid var(--border-gray-2);
+  border-radius: var(--radius-sm);
+  width: fit-content;
+  transition: border-color 0.15s var(--ease-standard), background 0.15s var(--ease-standard);
+}
+
+.learnMore:hover {
+  border-color: var(--brand-accent);
+  background: var(--brand-100);
+}
+
+.emergencyCard {
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.emergencyPhoto {
+  height: 170px;
+  flex-shrink: 0;
+  background-size: cover;
+  background-position: center;
+  background-color: var(--bg-light);
+}
+
+.emergencyBody {
+  flex: 1;
+  background: linear-gradient(160deg, var(--brand-800), var(--brand-accent));
+  padding: 26px 24px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  justify-content: flex-start;
+}
+
+.emergencyTitle {
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  color: var(--white);
+}
+
+.emergencyText {
+  font-size: var(--fs-sm);
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.5;
+}
+
+.emergencyBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  background: var(--white);
+  color: var(--brand-accent-dark);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  padding: 12px 18px;
+  border-radius: var(--radius-sm);
+  width: fit-content;
+  transition: transform 0.15s var(--ease-standard);
+}
+
+.emergencyBtn:hover {
+  transform: translateY(-2px);
+}
+
+@media (max-width: 980px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .photoWrap {
+    margin-bottom: 40px;
+  }
+
+  .missionBadge {
+    left: 0;
+    right: 0;
+  }
+}

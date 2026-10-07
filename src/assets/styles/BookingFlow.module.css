@@ -1,0 +1,108 @@
+.card {
+  background: var(--white);
+  border: 1px solid var(--border-gray);
+  border-radius: var(--radius-card);
+  padding: 28px;
+  max-width: 680px;
+}
+
+.stepper { display: flex; align-items: center; margin-bottom: 28px; }
+.stepperItem { display: flex; align-items: center; flex: 1; }
+.stepperItem:last-child { flex: 0; }
+
+.stepDot {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--bg-light); color: var(--text-secondary);
+  display: flex; align-items: center; justify-content: center;
+  font-size: var(--fs-xs); font-weight: 700; flex-shrink: 0;
+}
+.stepDotActive { background: var(--brand-accent); color: var(--white); }
+
+.stepLabel { font-size: var(--fs-2xs); color: var(--text-secondary); margin-left: 8px; white-space: nowrap; display: none; }
+.stepLabelActive { color: var(--text-primary); font-weight: 700; }
+
+.stepLine { flex: 1; height: 1px; background: var(--border-gray); margin: 0 10px; }
+
+.stepBody { min-height: 180px; margin-bottom: 24px; }
+
+.fieldLabel { font-size: var(--fs-xs); font-weight: 600; color: var(--text-primary); margin-bottom: 8px; display: block; }
+.timeLabel { margin-top: 20px; }
+
+.dateInput {
+  width: 100%;
+  border: 1px solid var(--border-gray-2);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  font-size: var(--fs-sm);
+  font-family: var(--font-body);
+  color: var(--text-primary);
+}
+.dateInput:focus-visible { outline: 2px solid var(--brand-accent); outline-offset: 1px; }
+
+.optionGrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.timeGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+
+.optionCard {
+  background: var(--white);
+  border: 1px solid var(--border-gray-2);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+  text-align: center;
+  transition: border-color 0.15s var(--ease-standard), background 0.15s var(--ease-standard);
+}
+.optionCard:hover { border-color: var(--brand-accent); }
+.optionCardActive { border-color: var(--brand-accent); background: var(--brand-100); color: var(--brand-accent-dark); }
+
+.summary { display: flex; flex-direction: column; gap: 12px; }
+.summaryRow {
+  display: flex; justify-content: space-between;
+  font-size: var(--fs-sm); color: var(--text-secondary);
+  padding-bottom: 12px; border-bottom: 1px solid var(--border-gray);
+}
+.summaryRow strong { color: var(--text-primary); }
+
+.actions { display: flex; justify-content: flex-end; gap: 10px; }
+
+.backBtn {
+  background: var(--white);
+  border: 1px solid var(--border-gray-2);
+  color: var(--text-primary);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  padding: 11px 20px;
+  border-radius: var(--radius-sm);
+}
+.backBtn:hover { border-color: var(--brand-accent); }
+
+.nextBtn {
+  background: var(--brand-accent);
+  color: var(--white);
+  border: none;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  padding: 11px 24px;
+  border-radius: var(--radius-sm);
+  transition: background 0.15s var(--ease-standard);
+}
+.nextBtn:hover { background: var(--brand-accent-dark); }
+.nextBtn:disabled { opacity: 0.5; cursor: default; }
+
+.successWrap { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 20px 0; }
+.successIcon {
+  width: 52px; height: 52px; border-radius: 50%;
+  background: var(--success-bg); color: var(--success-fg);
+  display: flex; align-items: center; justify-content: center; margin-bottom: 16px;
+}
+.successTitle { font-size: var(--fs-lg); }
+.successText { font-size: var(--fs-sm); color: var(--text-primary); font-weight: 600; margin-top: 8px; }
+.successNote { font-size: var(--fs-xs); color: var(--text-secondary); margin-top: 6px; }
+
+@media (min-width: 560px) {
+  .stepLabel { display: inline; }
+}
+@media (max-width: 480px) {
+  .optionGrid, .timeGrid { grid-template-columns: 1fr; }
+}

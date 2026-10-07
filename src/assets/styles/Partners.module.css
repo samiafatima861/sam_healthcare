@@ -1,0 +1,120 @@
+.section {
+  padding: 64px 0;
+  overflow: hidden;
+  background: var(--bg-light);
+}
+
+.inner {
+  margin-bottom: 32px;
+}
+
+.title {
+  text-align: center;
+  font-size: var(--fs-2xl);
+  color: var(--text-primary);
+  margin-top: 8px;
+}
+
+.titleAccent {
+  color: var(--brand-accent);
+}
+
+.label {
+  text-align: center;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.marqueeWrap {
+  overflow: hidden;
+  padding: 12px 0; /* room so shadows aren't clipped */
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+
+.marqueeTrack {
+  display: flex;
+  width: max-content;
+  animation: scroll-left 30s linear infinite;
+}
+
+.marqueeWrap:hover .marqueeTrack {
+  animation-play-state: paused;
+}
+
+/* each set is at least as wide as the screen, so there's never a gap */
+.group {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  gap: 24px;
+  padding-right: 24px; /* same as gap, keeps the loop spacing even */
+  min-width: 100vw;
+  flex-shrink: 0;
+}
+
+@keyframes scroll-left {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.logoCard {
+  flex: 0 0 200px;
+  height: 96px;
+  background: var(--white, #fff);
+  border: 1px solid var(--border-gray, #e5e7eb);
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(16, 24, 40, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.logoCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(16, 24, 40, 0.08);
+  border-color: var(--brand-accent);
+}
+
+.logoImg {
+  width: auto;
+  max-width: 100%;
+  height: 64px;
+  object-fit: contain;
+  filter: grayscale(100%);
+  opacity: 0.7;
+  transition: filter 0.25s ease, opacity 0.25s ease;
+}
+
+.logoCard:hover .logoImg {
+  filter: grayscale(0%);
+  opacity: 1;
+}
+
+.fallbackText {
+  font-size: var(--fs-sm, 14px);
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+@media (max-width: 640px) {
+  .section { padding: 48px 0; }
+  .logoCard { flex-basis: 160px; height: 80px; }
+  .logoImg { height: 36px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marqueeTrack {
+    animation: none;
+  }
+}

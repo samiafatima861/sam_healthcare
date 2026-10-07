@@ -1,0 +1,38 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 56px 20px;
+  background: var(--bg-light-2);
+  border: 1px dashed var(--border-gray-2);
+  border-radius: var(--radius-card);
+}
+
+.iconWrap {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--brand-100);
+  color: var(--brand-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.title { font-size: var(--fs-md); }
+.message { font-size: var(--fs-sm); color: var(--text-secondary); max-width: 40ch; margin-top: 6px; }
+
+.action {
+  display: inline-block;
+  margin-top: 16px;
+  background: var(--brand-accent);
+  color: var(--white);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  padding: 10px 20px;
+  border-radius: var(--radius-sm);
+  transition: background 0.15s var(--ease-standard);
+}
+.action:hover { background: var(--brand-accent-dark); }

@@ -1,0 +1,86 @@
+.wrap { max-width: 1200px; }
+
+.pageHeader { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
+.title { font-size: var(--fs-xl); }
+.subtitle { font-size: var(--fs-sm); color: var(--text-secondary); margin-top: 4px; }
+
+.statRow { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; }
+.statCard {
+  background: var(--white);
+  border: 1px solid var(--border-gray);
+  border-left: 3px solid var(--brand-accent);
+  border-radius: var(--radius-card);
+  padding: 16px 18px;
+}
+.statCard.amber { border-left-color: #C0862B; }
+.statCard.blue { border-left-color: #2E7DA6; }
+.statCard.danger { border-left-color: #A63737; }
+.statLabel { font-size: var(--fs-2xs); color: var(--text-secondary); font-weight: 600; }
+.statValue { font-family: var(--font-display); font-size: var(--fs-lg); font-weight: 700; margin-top: 4px; }
+
+.grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; }
+.mainCol, .sideCol { display: flex; flex-direction: column; gap: 20px; }
+
+.card { background: var(--white); border: 1px solid var(--border-gray); border-radius: var(--radius-card); padding: 20px 22px; }
+.cardHeader { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.cardTitle { font-size: var(--fs-md); }
+.cardCount { font-size: var(--fs-2xs); font-weight: 700; color: var(--text-secondary); background: var(--bg-light); padding: 3px 10px; border-radius: var(--radius-pill); }
+
+.row { display: flex; align-items: center; gap: 14px; padding: 13px 0; border-bottom: 1px solid var(--border-gray); }
+.card > .row:last-child { border-bottom: none; }
+
+.rowIcon {
+  width: 38px; height: 38px; border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.rowIconTeal { background: var(--brand-100); color: var(--brand-accent); }
+.rowIconAmber { background: rgba(192, 134, 43, 0.12); color: #C0862B; }
+.rowIconBlue { background: rgba(46, 125, 166, 0.12); color: #2E7DA6; }
+.rowIconDanger { background: var(--danger-bg); color: var(--danger-fg); }
+
+.rowInfo { flex: 1; min-width: 0; }
+.rowTitle { font-size: var(--fs-sm); font-weight: 700; color: var(--text-primary); }
+.rowSub { font-size: var(--fs-2xs); color: var(--text-secondary); margin-top: 2px; }
+.rowRight { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.rowMeta { font-size: var(--fs-xs); color: var(--text-secondary); text-align: right; }
+
+.pill { display: inline-block; font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: var(--radius-pill); white-space: nowrap; }
+.pillTeal { background: var(--brand-100); color: var(--brand-accent-dark); }
+.pillGreen { background: var(--success-bg); color: var(--success-fg); }
+.pillWarn { background: var(--warning-bg); color: var(--warning-fg); }
+.pillDanger { background: var(--danger-bg); color: var(--danger-fg); }
+.pillGray { background: var(--bg-light); color: var(--text-secondary); }
+
+.btnGhost {
+  background: var(--white); color: var(--text-primary); border: 1px solid var(--border-gray-2);
+  font-size: var(--fs-2xs); font-weight: 700; padding: 6px 12px; border-radius: var(--radius-sm);
+  white-space: nowrap; transition: border-color 0.15s var(--ease-standard), background 0.15s var(--ease-standard);
+}
+.btnGhost:hover { border-color: var(--brand-accent); background: var(--brand-100); }
+
+/* checklist rows, used by Nurse rounds */
+.taskRow { display: flex; align-items: center; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--border-gray); }
+.taskRow:last-child { border-bottom: none; }
+.taskCheckbox {
+  width: 20px; height: 20px; border-radius: 6px; border: 2px solid var(--border-gray-2);
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  background: var(--white); transition: background 0.15s var(--ease-standard), border-color 0.15s var(--ease-standard);
+}
+.taskCheckboxDone { background: var(--brand-accent); border-color: var(--brand-accent); color: var(--white); }
+.taskLabel { flex: 1; font-size: var(--fs-sm); color: var(--text-primary); }
+.taskLabelDone { color: var(--text-secondary); text-decoration: line-through; }
+
+/* room-style grid cards, used by OT coordinator */
+.roomGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.roomCard { border: 1px solid var(--border-gray); border-radius: var(--radius-sm); padding: 14px; }
+.roomName { font-size: var(--fs-sm); font-weight: 700; color: var(--text-primary); }
+.roomMeta { font-size: var(--fs-2xs); color: var(--text-secondary); margin-top: 3px; }
+
+.inventoryBarTrack { width: 70px; height: 6px; background: var(--bg-light); border-radius: var(--radius-pill); overflow: hidden; flex-shrink: 0; }
+.inventoryBarFill { height: 100%; border-radius: var(--radius-pill); }
+
+@media (max-width: 1000px) {
+  .statRow { grid-template-columns: 1fr; }
+  .grid { grid-template-columns: 1fr; }
+  .roomGrid { grid-template-columns: repeat(2, 1fr); }
+}

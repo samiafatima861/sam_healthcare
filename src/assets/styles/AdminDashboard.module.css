@@ -1,0 +1,77 @@
+.wrap { max-width: 1300px; }
+
+.pageHeader { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
+.title { font-size: var(--fs-xl); }
+.subtitle { font-size: var(--fs-sm); color: var(--text-secondary); margin-top: 4px; }
+
+.statRow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
+.statCard {
+  background: var(--white);
+  border: 1px solid var(--border-gray);
+  border-left: 3px solid var(--brand-accent);
+  border-radius: var(--radius-card);
+  padding: 16px 18px;
+}
+.statCard.amber { border-left-color: #C0862B; }
+.statCard.blue { border-left-color: #2E7DA6; }
+.statCard.purple { border-left-color: #6E5AA8; }
+.statLabel { font-size: var(--fs-2xs); color: var(--text-secondary); font-weight: 600; }
+.statValue { font-family: var(--font-display); font-size: var(--fs-lg); font-weight: 700; margin-top: 4px; }
+.statTrend { font-size: 11px; font-weight: 600; margin-top: 4px; }
+.trendUp { color: var(--success-fg); }
+.trendDown { color: var(--danger-fg); }
+
+.grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; }
+.mainCol, .sideCol { display: flex; flex-direction: column; gap: 20px; }
+
+.card { background: var(--white); border: 1px solid var(--border-gray); border-radius: var(--radius-card); padding: 20px 22px; }
+.cardHeader { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.cardTitle { font-size: var(--fs-md); }
+.cardCount { font-size: var(--fs-2xs); font-weight: 700; color: var(--text-secondary); background: var(--bg-light); padding: 3px 10px; border-radius: var(--radius-pill); }
+
+/* revenue chart */
+.chartWrap { display: flex; align-items: flex-end; gap: 10px; height: 140px; padding-top: 10px; }
+.barCol { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; justify-content: flex-end; }
+.bar { width: 100%; max-width: 34px; background: var(--brand-accent); border-radius: 4px 4px 0 0; transition: background 0.15s var(--ease-standard); }
+.bar:hover { background: var(--brand-accent-dark); }
+.barLabel { font-size: 10px; color: var(--text-secondary); font-weight: 600; }
+
+/* departments */
+.deptRow { display: flex; align-items: center; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--border-gray); }
+.deptRow:last-child { border-bottom: none; }
+.deptInfo { flex: 1; min-width: 0; }
+.deptName { font-size: var(--fs-sm); font-weight: 700; color: var(--text-primary); }
+.deptMeta { font-size: var(--fs-2xs); color: var(--text-secondary); margin-top: 1px; }
+.deptBarTrack { width: 90px; height: 6px; background: var(--bg-light); border-radius: var(--radius-pill); overflow: hidden; flex-shrink: 0; }
+.deptBarFill { height: 100%; background: var(--brand-accent); border-radius: var(--radius-pill); }
+.deptPct { font-size: var(--fs-2xs); font-weight: 700; color: var(--text-primary); width: 34px; text-align: right; flex-shrink: 0; }
+
+/* staff table */
+.table { width: 100%; border-collapse: collapse; }
+.table th {
+  text-align: left; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em;
+  color: var(--text-secondary); padding: 0 10px 10px; border-bottom: 1px solid var(--border-gray);
+}
+.table td { padding: 12px 10px; border-bottom: 1px solid var(--border-gray); font-size: var(--fs-sm); }
+.table tr:last-child td { border-bottom: none; }
+.staffName { font-weight: 700; color: var(--text-primary); }
+.staffRole { color: var(--text-secondary); font-size: var(--fs-xs); }
+
+.pill { display: inline-block; font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: var(--radius-pill); }
+.pillActive { background: var(--success-bg); color: var(--success-fg); }
+.pillLeave { background: var(--warning-bg); color: var(--warning-fg); }
+.pillInactive { background: var(--danger-bg); color: var(--danger-fg); }
+
+/* activity feed */
+.activityRow { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--border-gray); }
+.activityRow:last-child { border-bottom: none; }
+.activityDot { width: 8px; height: 8px; border-radius: 50%; background: var(--brand-accent); margin-top: 6px; flex-shrink: 0; }
+.activityInfo { flex: 1; min-width: 0; }
+.activityText { font-size: var(--fs-xs); color: var(--text-primary); }
+.activityTime { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+
+@media (max-width: 1100px) {
+  .statRow { grid-template-columns: repeat(2, 1fr); }
+  .grid { grid-template-columns: 1fr; }
+  .table { display: block; overflow-x: auto; }
+}

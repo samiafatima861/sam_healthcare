@@ -1,0 +1,59 @@
+.wrap { max-width: 1200px; }
+
+.pageHeader { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
+.title { font-size: var(--fs-xl); }
+.subtitle { font-size: var(--fs-sm); color: var(--text-secondary); margin-top: 4px; }
+
+.statRow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
+.statCard {
+  background: var(--white);
+  border: 1px solid var(--border-gray);
+  border-left: 3px solid var(--brand-accent);
+  border-radius: var(--radius-card);
+  padding: 16px 18px;
+}
+.statCard.amber { border-left-color: #C0862B; }
+.statCard.blue { border-left-color: #2E7DA6; }
+.statCard.danger { border-left-color: #A63737; }
+.statLabel { font-size: var(--fs-2xs); color: var(--text-secondary); font-weight: 600; }
+.statValue { font-family: var(--font-display); font-size: var(--fs-lg); font-weight: 700; margin-top: 4px; }
+
+.tabs {
+  display: flex; gap: 4px; background: var(--bg-light); padding: 4px;
+  border-radius: var(--radius-sm); width: fit-content; margin-bottom: 16px;
+}
+.tab { background: none; border: none; color: var(--text-secondary); font-size: var(--fs-xs); font-weight: 600; padding: 7px 16px; border-radius: 7px; }
+.tabActive { background: var(--white); color: var(--text-primary); box-shadow: 0 1px 2px rgba(3,26,71,0.08); }
+
+.card { background: var(--white); border: 1px solid var(--border-gray); border-radius: var(--radius-card); padding: 6px 22px; }
+
+.row { display: flex; align-items: center; gap: 14px; padding: 15px 0; border-bottom: 1px solid var(--border-gray); }
+.card > .row:last-child { border-bottom: none; }
+.rowInfo { flex: 1; min-width: 0; }
+.rowTitle { font-size: var(--fs-sm); font-weight: 700; color: var(--text-primary); }
+.rowSub { font-size: var(--fs-2xs); color: var(--text-secondary); margin-top: 2px; }
+.rowRight { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.amount { font-weight: 700; color: var(--text-primary); font-size: var(--fs-sm); }
+
+.pill { display: inline-block; font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: var(--radius-pill); white-space: nowrap; }
+.pillPaid { background: var(--success-bg); color: var(--success-fg); }
+.pillUnpaid { background: var(--warning-bg); color: var(--warning-fg); }
+.pillClaimReview { background: var(--brand-100); color: var(--brand-accent-dark); }
+.pillClaimApproved { background: var(--success-bg); color: var(--success-fg); }
+.pillClaimRejected { background: var(--danger-bg); color: var(--danger-fg); }
+
+.btnGhost {
+  background: var(--white); color: var(--text-primary); border: 1px solid var(--border-gray-2);
+  font-size: var(--fs-2xs); font-weight: 700; padding: 6px 12px; border-radius: var(--radius-sm);
+  white-space: nowrap; transition: border-color 0.15s var(--ease-standard);
+}
+.btnGhost:hover { border-color: var(--brand-accent); background: var(--brand-100); }
+
+.itemList { margin-top: 6px; padding-left: 4px; }
+.itemLine { display: flex; justify-content: space-between; font-size: var(--fs-xs); color: var(--text-secondary); padding: 3px 0; }
+
+@media (max-width: 1000px) {
+  .statRow { grid-template-columns: repeat(2, 1fr); }
+  .row { flex-wrap: wrap; }
+  .rowRight { width: 100%; justify-content: space-between; }
+}

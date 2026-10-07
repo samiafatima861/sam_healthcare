@@ -1,0 +1,149 @@
+.section {
+  padding: 60px 0;
+  background: var(--bg-light);
+}
+
+.heading {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.title {
+  font-size: var(--fs-2xl);
+  color: var(--text-primary);
+}
+
+.titleAccent {
+  color: var(--brand-accent);
+}
+
+.subtitle {
+  font-size: var(--fs-md);
+  color: var(--text-secondary);
+  margin-top: 10px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.card {
+  background: var(--white);
+  border: 1px solid var(--border-gray);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: transform 0.15s var(--ease-standard), border-color 0.15s var(--ease-standard);
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  border-color: var(--brand-accent);
+}
+
+.banner {
+  position: relative;
+  height: 72px;
+  background: var(--brand-100);
+}
+
+.availableBadge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: var(--success-bg);
+  color: var(--success-fg);
+  font-size: 10px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+}
+
+.avatar {
+  position: absolute;
+  left: 50%;
+  bottom: -36px;
+  transform: translateX(-50%);
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 3px solid var(--white);
+  background-size: cover;
+  background-position: center;
+  background-color: var(--bg-light-2);
+}
+
+.cardBody {
+  padding: 48px 20px 24px;
+  text-align: center;
+}
+
+.name {
+  font-size: var(--fs-md);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.specialty {
+  font-size: var(--fs-xs);
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 14px;
+}
+
+.rating,
+.experience {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.price {
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-top: 16px;
+}
+
+.price span {
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.bookBtn {
+  display: block;
+  margin-top: 16px;
+  background: var(--brand-accent);
+  color: var(--white);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  padding: 11px 0;
+  border-radius: 14px;
+  text-align: center;
+  transition: background 0.15s var(--ease-standard);
+}
+
+.bookBtn:hover {
+  background: var(--brand-accent-dark);
+}
+
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: 1fr;
+    max-width: 340px;
+  }
+}

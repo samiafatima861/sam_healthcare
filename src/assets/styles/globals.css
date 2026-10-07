@@ -1,0 +1,120 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap');
+
+:root {
+  --brand-900: #062f5e;
+  --brand-800: #01215C;
+  --brand-700: #02AD99;
+  --brand-accent: #02AD99;
+  --brand-accent-dark: #01215C;
+  --brand-bright: #019DFC;
+  --brand-cyan: #02C2AC;
+  --brand-100: #E5F7F5;
+
+  --white: #FFFFFF;
+  --bg-light: #F4F7F8;
+  --bg-light-2: #F7F9FA;
+  --border-gray: #E1E7EA;
+  --border-gray-2: #DCE3E7;
+  --text-primary: #16323F;
+  /* --text-secondary: #7C8C93; */
+  --text-secondary: #5E6E76;
+  --success-fg: #085041;
+  --success-bg: #94d2ed;
+  --warning-fg: #633806;
+  --warning-bg: #FAEEDA;
+  --danger-fg: #791F1F;
+  --danger-bg: #FCEBEB;
+  --star: #EF9F27;
+
+  --font-display: 'Manrope', sans-serif;
+  --font-body: 'Inter', sans-serif;
+
+  --fs-2xs: 0.75rem;
+  --fs-xs: 0.8125rem;
+  --fs-sm: 0.9375rem;
+  --fs-base: 1rem;
+  --fs-md: 1.125rem;
+  --fs-lg: 1.375rem;
+  --fs-xl: 1.75rem;
+  --fs-2xl: 2.25rem;
+  --fs-3xl: 3rem;
+
+  --max-width: 1200px;
+  --radius-card: 12px;
+  --radius-sm: 10px;
+  --radius-pill: 999px;
+  --ease-standard: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  width: 100%;
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--text-primary);
+  background: var(--white);
+  font-size: var(--fs-base);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  color: var(--text-primary);
+  line-height: 1.15;
+  font-weight: 700;
+}
+
+p {
+  color: var(--text-secondary);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-family: var(--font-body);
+  cursor: pointer;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+ul {
+  list-style: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--brand-accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.container {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 24px;
+  width: 100%;
+}

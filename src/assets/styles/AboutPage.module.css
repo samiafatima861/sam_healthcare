@@ -1,0 +1,21 @@
+.section { padding: 56px 0; }
+
+.intro { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; margin-bottom: 56px; }
+.introImage { border-radius: var(--radius-card); width: 100%; height: auto; }
+.introTitle { font-size: var(--fs-xl); margin-bottom: 12px; }
+.introText { font-size: var(--fs-sm); line-height: 1.7; }
+
+.valuesGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.valueCard { background: var(--bg-light-2); border-radius: var(--radius-card); padding: 24px; }
+.valueIcon {
+  width: 42px; height: 42px; border-radius: var(--radius-sm);
+  background: var(--brand-100); color: var(--brand-accent);
+  display: flex; align-items: center; justify-content: center; margin-bottom: 14px;
+}
+.valueTitle { font-size: var(--fs-md); margin-bottom: 6px; }
+.valueText { font-size: var(--fs-sm); }
+
+@media (max-width: 800px) {
+  .intro { grid-template-columns: 1fr; }
+  .valuesGrid { grid-template-columns: 1fr; }
+}

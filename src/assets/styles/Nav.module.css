@@ -1,0 +1,222 @@
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.utilityBar {
+  background: var(--brand-900);
+  color: rgba(255, 255, 255, 0.75);
+  font-size: var(--fs-2xs);
+}
+
+.utilityInner {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  height: 36px;
+}
+
+.utilityItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+a.utilityItem:hover { color: var(--white); }
+
+.nav {
+  background: var(--white);
+  border-bottom: 1px solid var(--border-gray);
+}
+
+.navInner {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  height: 72px;
+  gap: 24px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+}
+
+.link {
+  position: relative;
+  display: inline-block;
+  padding: 4px 0;
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -6px;
+  height: 2px;
+  background: var(--brand-accent);
+  transform: scaleX(0);
+  transition: transform 0.2s var(--ease-standard);
+}
+
+.link:hover { color: var(--brand-accent); }
+.linkActive { color: var(--brand-accent); }
+.linkActive::after { transform: scaleX(1); }
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-shrink: 0;
+  justify-self: end;
+}
+
+.loginLink {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+  background: none;
+  border: none;
+}
+
+.bookBtn {
+  background: var(--brand-accent);
+  color: var(--white);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  padding: 11px 22px;
+  border-radius: var(--radius-sm);
+  transition: background 0.15s var(--ease-standard);
+}
+
+.bookBtn:hover { background: var(--brand-accent-dark); }
+
+.menuToggle {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  padding: 6px;
+}
+
+.profile { position: relative; }
+
+.profileTrigger {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  padding: 4px;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--brand-accent);
+  color: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.profileMenu {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  min-width: 190px;
+  background: var(--white);
+  border: 1px solid var(--border-gray);
+  border-radius: var(--radius-card);
+  padding: 8px;
+}
+
+.profileName {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border-gray);
+  margin-bottom: 4px;
+}
+
+.profileItem {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  font-size: var(--fs-sm);
+  color: var(--text-primary);
+  padding: 9px 10px;
+  border-radius: var(--radius-sm);
+}
+
+.profileItem:hover { background: var(--bg-light); }
+
+.mobileMenu { display: none; }
+.mobileLinkActive { color: var(--brand-accent); }
+
+@media (max-width: 900px) {
+  .utilityInner { gap: 18px; overflow-x: auto; scrollbar-width: none; }
+  .utilityInner::-webkit-scrollbar { display: none; }
+  .links, .actions { display: none; }
+  .menuToggle { display: flex; margin-left: auto; }
+
+  .mobileMenu {
+    display: block;
+    background: var(--white);
+    border-top: 1px solid transparent;
+    padding: 0 24px;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-height 0.35s var(--ease-standard), opacity 0.25s ease,
+      padding 0.35s var(--ease-standard), border-color 0.35s var(--ease-standard);
+  }
+
+  .mobileMenuOpen {
+    max-height: 480px;
+    opacity: 1;
+    padding: 8px 24px 24px;
+    border-top-color: var(--border-gray);
+  }
+
+  .mobileLinks { display: flex; flex-direction: column; }
+
+  .mobileLink {
+    display: block;
+    padding: 14px 0;
+    font-size: var(--fs-md);
+    font-weight: 500;
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-gray);
+  }
+
+  .mobileActions { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+  .mobileActions .loginLink {
+    text-align: center;
+    padding: 10px;
+    border: 1px solid var(--border-gray-2);
+    border-radius: var(--radius-sm);
+  }
+  .mobileActions .bookBtn { text-align: center; }
+}

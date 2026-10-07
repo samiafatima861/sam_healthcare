@@ -1,0 +1,35 @@
+.header {
+  background: linear-gradient(135deg, var(--brand-900), var(--brand-800));
+  padding: 40px 0 46px;
+}
+
+.inner { max-width: 720px; }
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--fs-xs);
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 14px;
+}
+.breadcrumbLink { color: rgba(255, 255, 255, 0.75); }
+.breadcrumbLink:hover { color: var(--white); }
+.breadcrumbSep { color: rgba(255, 255, 255, 0.35); }
+.breadcrumbCurrent { color: rgba(255, 255, 255, 0.9); font-weight: 600; }
+
+.title {
+  font-size: var(--fs-2xl);
+  color: var(--white);
+}
+
+.subtitle {
+  font-size: var(--fs-md);
+  color: rgba(255, 255, 255, 0.75);
+  margin-top: 10px;
+  max-width: 56ch;
+}
+
+@media (max-width: 640px) {
+  .title { font-size: var(--fs-xl); }
+}

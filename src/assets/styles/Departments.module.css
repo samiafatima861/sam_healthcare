@@ -1,0 +1,149 @@
+.section {
+  padding: 60px 0;
+}
+
+.heading {
+  text-align: left;
+  margin-bottom: 24px;
+}
+
+.title {
+  font-size: var(--fs-2xl);
+  color: var(--text-primary);
+}
+
+.titleAccent {
+  color: var(--brand-accent);
+}
+
+.subtitle {
+  font-size: var(--fs-md);
+  color: var(--text-secondary);
+  margin-top: 10px;
+}
+
+.carousel {
+  position: relative;
+}
+
+.pagerBtn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 5;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--border-gray-2);
+  background: var(--white);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.15s var(--ease-standard), background 0.15s var(--ease-standard);
+}
+
+.pagerLeft {
+  left: -20px;
+}
+
+.pagerRight {
+  right: -20px;
+}
+
+.pagerBtn:hover:not(:disabled) {
+  border-color: var(--brand-accent);
+  background: var(--brand-100);
+}
+
+.pagerBtn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 20px;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border-gray);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  transition: border-color 0.15s var(--ease-standard), transform 0.15s var(--ease-standard);
+}
+
+.card:hover {
+  border-color: var(--brand-accent);
+  transform: translateY(-3px);
+}
+
+.photo {
+  aspect-ratio: 4 / 3;
+  background-size: cover;
+  background-position: center;
+  background-color: var(--bg-light);
+}
+
+.cardBody {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex: 1;
+  gap: 12px;
+  padding: 16px;
+}
+
+.cardTitle {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.cardDesc {
+  font-size: var(--fs-2xs);
+  color: var(--text-secondary);
+  line-height: 1.4;
+  margin-top: 4px;
+}
+
+.arrow {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--brand-100);
+  color: var(--brand-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s var(--ease-standard), color 0.15s var(--ease-standard);
+  align-self: flex-start;
+}
+
+.card:hover .arrow {
+  background: var(--brand-accent);
+  color: var(--white);
+}
+
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .pagerLeft {
+    left: 0;
+  }
+
+  .pagerRight {
+    right: 0;
+  }
+}
+
+@media (max-width: 560px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
