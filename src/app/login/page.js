@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { Activity, ShieldCheck, Zap } from 'lucide-react';
-import AuthForm from '../../../components/AuthForm';
-import styles from '../../../assets/styles/AuthPage.module.css';
+import AuthForm from '../../components/AuthForm';
+import styles from '../../assets/styles/AuthPage.module.css';
 
 const FEATURES = [
   { icon: Activity, title: 'Real-time records', desc: 'Access your health data anytime' },

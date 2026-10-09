@@ -8,7 +8,7 @@ import styles from '../assets/styles/Nav.module.css';
 import Image from 'next/image';
 
 const NAV_LINKS = [
-  { label: 'Home', href: '/home' },
+  { label: 'Home', href: '/' },
   { label: 'Departments', href: '/departments' },
   { label: 'Services', href: '/#services' },
   { label: 'About', href: '/about' },

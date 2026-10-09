@@ -71,8 +71,8 @@ function Avatar({ review }) {
     <Image
       src={review.photo}
       alt={review.name}
-      width={112}
-      height={112}
+      width={76}
+      height={76}
       className={styles.avatarImg}
       onError={() => setBroken(true)}
     />
