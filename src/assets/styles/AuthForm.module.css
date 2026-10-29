@@ -185,3 +185,8 @@
   color: var(--brand-bright);
   font-weight: 600;
 }
+
+.alert { font-size: 0.8125rem; font-weight: 600; padding: 10px 12px; border-radius: 10px; line-height: 1.5; }
+.alertError { background: var(--danger-bg); color: var(--danger-fg); }
+.alertInfo { background: var(--success-bg); color: var(--success-fg); }
+.submitBtn:disabled, .googleBtn:disabled { opacity: 0.6; cursor: default; }

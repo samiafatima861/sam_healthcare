@@ -1,3 +1,4 @@
+import AuthGate from '@/components/AuthGate';
 import DashboardShell from '../../../components/DashboardShell';
 
 export const metadata = { title: 'Pharmacy — Sam Healthcare' };
@@ -9,8 +10,10 @@ const NAV_ITEMS = [
 
 export default function PharmacistLayout({ children }) {
   return (
+     <AuthGate allow={['pharmacist']}>
     <DashboardShell roleLabel="Pharmacist" navItems={NAV_ITEMS} userName="Kamran Yousuf" userInitials="KY">
       {children}
     </DashboardShell>
+    </AuthGate>
   );
 }

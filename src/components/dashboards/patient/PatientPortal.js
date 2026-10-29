@@ -1,14 +1,16 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import {
-  CalendarClock,
   FlaskConical,
-  Wallet,
   Download,
   ChevronRight,
   CalendarPlus,
-  ArrowRight,
   ClipboardList,
 } from 'lucide-react';
 import Link from 'next/link';
+import { supabase } from '../../../lib/supabaseClient';
+import PortalStats from './PortalStats';
 import styles from '../../../assets/styles/PatientPortal.module.css';
 
 const VISITS = [
@@ -35,12 +37,41 @@ const HISTORY_PILL = {
   Surgery: 'pillUpcoming',
 };
 
+function firstNameOf(full) {
+  const cleaned = (full || '').replace(/^(dr\.?|mr\.?|mrs\.?|ms\.?)\s+/i, '').trim();
+  const first = cleaned.split(/\s+/)[0] || '';
+  return first ? first.charAt(0).toUpperCase() + first.slice(1) : '';
+}
+
 export default function PatientPortal() {
+  const [firstName, setFirstName] = useState('');
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadName() {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('id', session.user.id)
+        .maybeSingle();
+
+      const name = firstNameOf(profile?.full_name || session.user.user_metadata?.full_name || session.user.email?.split('@')[0]);
+      if (active && name) setFirstName(name);
+    }
+
+    loadName();
+    return () => { active = false; };
+  }, []);
+
   return (
     <div className={styles.wrap}>
       <div className={styles.pageHeader}>
         <div>
-          <h1 className={styles.title}>Welcome back, Ahsan</h1>
+          <h1 className={styles.title}>{firstName ? `Welcome back, ${firstName}` : 'Welcome back'}</h1>
           <p className={styles.subtitle}>Here's what's happening with your care.</p>
         </div>
         <Link href="/book" className={styles.bookBtn}>
@@ -49,36 +80,7 @@ export default function PatientPortal() {
         </Link>
       </div>
 
-      <div className={styles.statRow}>
-        <div className={`${styles.statCard} ${styles.accentBlue}`}>
-          <span className={styles.statIcon}><CalendarClock size={20} strokeWidth={2} /></span>
-          <div>
-            <p className={styles.statLabel}>Next appointment</p>
-            <p className={styles.statValue}>Today, 4:40 PM</p>
-          </div>
-        </div>
-
-        <div className={`${styles.statCard} ${styles.accentTeal}`}>
-          <span className={styles.statIcon}><FlaskConical size={20} strokeWidth={2} /></span>
-          <div>
-            <p className={styles.statLabel}>Lab reports ready</p>
-            <p className={styles.statValue}>2 <span className={styles.statMuted}>of 3</span></p>
-          </div>
-        </div>
-
-        <div className={styles.statCardBilling}>
-          <div className={styles.statCardBillingTop}>
-            <span className={styles.statIconBilling}><Wallet size={20} strokeWidth={2} /></span>
-            <div>
-              <p className={styles.statLabelBilling}>Outstanding balance</p>
-              <p className={styles.statValueBilling}>Rs 1,240</p>
-            </div>
-          </div>
-          <Link href="/portal/billing" className={styles.statPayLink}>
-            Pay now <ArrowRight size={13} strokeWidth={2.5} />
-          </Link>
-        </div>
-      </div>
+      <PortalStats />
 
       <div className={styles.grid}>
         <div className={styles.mainCol}>

@@ -1,3 +1,4 @@
+import AuthGate from '@/components/AuthGate';
 import DashboardShell from '../../components/DashboardShell';
 
 export const metadata = { title: 'Patient portal — Sam Healthcare' };
@@ -13,6 +14,7 @@ const NAV_ITEMS = [
 
 export default function PortalLayout({ children }) {
   return (
+   <AuthGate allow={['patient']}>
     <DashboardShell
       roleLabel="Patient portal"
       navItems={NAV_ITEMS}
@@ -21,5 +23,6 @@ export default function PortalLayout({ children }) {
     >
       {children}
     </DashboardShell>
+    </AuthGate> 
   );
 }

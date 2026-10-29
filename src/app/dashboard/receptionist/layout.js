@@ -1,3 +1,4 @@
+import AuthGate from '@/components/AuthGate';
 import DashboardShell from '../../../components/DashboardShell';
 
 export const metadata = { title: 'Receptionist dashboard — Sam Healthcare' };
@@ -10,6 +11,7 @@ const NAV_ITEMS = [
 ];
 export default function ReceptionistLayout({ children }) {
   return (
+     <AuthGate allow={['receptionist']}>
     <DashboardShell
       roleLabel="Receptionist"
       navItems={NAV_ITEMS}
@@ -18,5 +20,6 @@ export default function ReceptionistLayout({ children }) {
     >
       {children}
     </DashboardShell>
+    </AuthGate>
   );
 }

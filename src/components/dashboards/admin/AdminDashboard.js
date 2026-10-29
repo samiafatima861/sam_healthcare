@@ -1,163 +1,283 @@
-import { TrendingUp, TrendingDown } from 'lucide-react';
+'use client';
+
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import {
+  Users, CalendarCheck, Inbox, Stethoscope, CalendarClock, Mail, Building2,
+} from 'lucide-react';
+import { supabase } from '../../../lib/supabaseClient';
+import { toISO, titleCase } from '../../../lib/appointmentUtils';
+import { digits, norm, timeAgo } from '../../../lib/adminUtils';
 import styles from '../../../assets/styles/AdminDashboard.module.css';
 
-const REVENUE = [
-  { month: 'Apr', amount: 820000 },
-  { month: 'May', amount: 910000 },
-  { month: 'Jun', amount: 870000 },
-  { month: 'Jul', amount: 960000 },
-  { month: 'Aug', amount: 1040000 },
-  { month: 'Sep', amount: 1120000 },
-];
-
-const DEPARTMENTS = [
-  { name: 'Cardiology', patients: 312, load: 82 },
-  { name: 'General Physician', patients: 540, load: 91 },
-  { name: 'Dermatology', patients: 198, load: 54 },
-  { name: 'Orthopedics', patients: 164, load: 47 },
-  { name: 'Pediatrics', patients: 271, load: 68 },
-];
-
-const STAFF = [
-  { name: 'Dr. Priya Sharma', role: 'General Physician', dept: 'General Medicine', status: 'Active' },
-  { name: 'Dr. Arjun Mehta', role: 'Cardiologist', dept: 'Cardiology', status: 'Active' },
-  { name: 'Dr. Neha Verma', role: 'Dermatologist', dept: 'Dermatology', status: 'Active' },
-  { name: 'Dr. Omar Siddiqui', role: 'Orthopedist', dept: 'Orthopedics', status: 'On leave' },
-  { name: 'Fatima Noor', role: 'Receptionist', dept: 'Front desk', status: 'Active' },
-  { name: 'Usman Ali', role: 'Billing officer', dept: 'Billing', status: 'Active' },
-  { name: 'Sarah Malik', role: 'Lab technician', dept: 'Laboratory', status: 'Inactive' },
-];
-
-const ACTIVITY = [
-  { text: 'Dr. Arjun Mehta admitted a patient in Cardiology', time: '12 minutes ago' },
-  { text: 'New invoice INV-1042 generated for Bilal Ahmed', time: '38 minutes ago' },
-  { text: 'Insurance claim CLM-3077 approved by Jubilee Health', time: '1 hour ago' },
-  { text: 'Fatima Noor checked in 3 walk-in patients', time: '2 hours ago' },
-  { text: 'Dr. Omar Siddiqui marked on leave for the week', time: 'Yesterday' },
-];
-
-const STAFF_PILL = { Active: styles.pillActive, 'On leave': styles.pillLeave, Inactive: styles.pillInactive };
-
-const fmt = (n) => 'Rs ' + (n / 1000).toFixed(0) + 'k';
+const ACTIVITY_ICON = { booking: CalendarClock, staff: Users, message: Mail };
 
 export default function AdminDashboard() {
-  const maxRevenue = Math.max(...REVENUE.map((r) => r.amount));
-  const totalPatients = DEPARTMENTS.reduce((s, d) => s + d.patients, 0);
-  const activeStaff = STAFF.filter((s) => s.status === 'Active').length;
-  const thisMonth = REVENUE[REVENUE.length - 1].amount;
-  const lastMonth = REVENUE[REVENUE.length - 2].amount;
-  const revenueUp = thisMonth >= lastMonth;
+  const [appointments, setAppointments] = useState([]);
+  const [staff, setStaff] = useState([]);
+  const [departments, setDepartments] = useState([]);
+  const [messages, setMessages] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [setup, setSetup] = useState(false);
+  const [today, setToday] = useState(null);
+
+  useEffect(() => {
+    setToday(toISO(new Date()));
+
+    async function load() {
+      const [a, s, d, m] = await Promise.all([
+        supabase.from('appointments').select('*'),
+        supabase.from('staff').select('*'),
+        supabase.from('departments').select('*'),
+        supabase.from('contact_messages').select('*').order('created_at', { ascending: false }).limit(20),
+      ]);
+
+      if (a.error) setError(a.error.message);
+      else setAppointments(a.data || []);
+
+      if (s.error || d.error) {
+        setSetup(true);
+      } else {
+        setStaff(s.data || []);
+        setDepartments(d.data || []);
+      }
+
+      // messages stay private unless the optional SQL was run, so ignore errors here
+      if (!m.error) setMessages(m.data || []);
+      setLoading(false);
+    }
+
+    load();
+  }, []);
+
+  if (!today) {
+    return <div className={styles.wrap}><p className={styles.subtitle}>Loading...</p></div>;
+  }
+
+  /* ----- derived numbers ----- */
+  const live = appointments.filter((a) => a.status !== 'Cancelled');
+  const patientKeys = new Set(live.map((a) => digits(a.patient_phone) || norm(a.patient_name)));
+  const todayCount = live.filter((a) => a.appointment_date === today).length;
+  const pending = appointments.filter((a) => a.status === 'Pending').length;
+  const activeStaff = staff.filter((s) => s.status === 'Active').length;
+  const newMessages = messages.filter((m) => m.status === 'New').length;
+
+  /* appointments per month, last 6 months */
+  const base = new Date();
+  const months = [];
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(base.getFullYear(), base.getMonth() - i, 1);
+    months.push({
+      key: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`,
+      label: d.toLocaleDateString('en-US', { month: 'short' }),
+      count: 0,
+    });
+  }
+  live.forEach((a) => {
+    const m = months.find((x) => (a.appointment_date || '').startsWith(x.key));
+    if (m) m.count += 1;
+  });
+  const maxMonth = Math.max(1, ...months.map((m) => m.count));
+
+  /* department load */
+  const deptCounts = {};
+  live.forEach((a) => {
+    const k = titleCase(a.department);
+    deptCounts[k] = (deptCounts[k] || 0) + 1;
+  });
+  const deptList = Object.entries(deptCounts).sort((x, y) => y[1] - x[1]).slice(0, 5);
+  const deptMax = deptList.length ? deptList[0][1] : 1;
+
+  /* staff by status */
+  const team = ['Active', 'On leave', 'Inactive'].map((status) => ({
+    status,
+    count: staff.filter((s) => s.status === status).length,
+    dot: status === 'Active' ? styles.dotActive : status === 'On leave' ? styles.dotLeave : styles.dotInactive,
+  }));
+
+  /* real recent activity */
+  const activity = [
+    ...appointments.filter((a) => a.created_at).map((a) => ({
+      id: `a${a.id}`, kind: 'booking', at: a.created_at,
+      text: `${a.patient_name} booked ${titleCase(a.department)}${a.doctor_name ? ` with ${a.doctor_name}` : ''}`,
+    })),
+    ...staff.filter((s) => s.created_at).map((s) => ({
+      id: `s${s.id}`, kind: 'staff', at: s.created_at,
+      text: `${s.full_name} added to the team as ${s.role}`,
+    })),
+    ...messages.map((m) => ({
+      id: `m${m.id}`, kind: 'message', at: m.created_at,
+      text: `New message from ${m.name}: ${m.subject}`,
+    })),
+  ].sort((x, y) => new Date(y.at) - new Date(x.at)).slice(0, 6);
+
+  const QUICK = [
+    { href: '/dashboard/admin/staff', icon: Users, title: 'Manage staff', sub: `${staff.length} team members` },
+    { href: '/dashboard/admin/departments', icon: Building2, title: 'Departments', sub: `${departments.length} departments` },
+    { href: '/dashboard/admin/appointments', icon: CalendarClock, title: 'Appointments', sub: `${pending} pending` },
+    { href: '/dashboard/admin/messages', icon: Mail, title: 'Messages', sub: `${newMessages} new` },
+  ];
 
   return (
     <div className={styles.wrap}>
-      <div className={styles.pageHeader}>
+      <div className={styles.header}>
         <div>
           <h1 className={styles.title}>Hospital overview</h1>
-          <p className={styles.subtitle}>System-wide activity across every department.</p>
+          <p className={styles.subtitle}>
+            {loading ? 'Loading...' : 'Live activity across bookings, staff and departments.'}
+          </p>
         </div>
       </div>
+
+      {error && <p className={`${styles.notice} ${styles.noticeError}`}>Could not load appointments: {error}</p>}
+      {setup && (
+        <p className={`${styles.notice} ${styles.noticeInfo}`}>
+          Staff and departments are not set up yet. Run the admin SQL in Supabase, then refresh.
+        </p>
+      )}
 
       <div className={styles.statRow}>
         <div className={styles.statCard}>
-          <p className={styles.statLabel}>Total patients</p>
-          <p className={styles.statValue}>{totalPatients.toLocaleString('en-US')}</p>
+          <span className={`${styles.statIcon} ${styles.toneTeal}`}><Users size={22} strokeWidth={2} /></span>
+          <div>
+            <p className={styles.statLabel}>Total patients</p>
+            <p className={styles.statValue}>{patientKeys.size}</p>
+            <p className={styles.statSub}>Unique patients booked</p>
+          </div>
         </div>
-        <div className={`${styles.statCard} ${styles.blue}`}>
-          <p className={styles.statLabel}>Active staff</p>
-          <p className={styles.statValue}>{activeStaff} <span style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 500 }}>of {STAFF.length}</span></p>
+        <div className={styles.statCard}>
+          <span className={`${styles.statIcon} ${styles.toneBlue}`}><CalendarCheck size={22} strokeWidth={2} /></span>
+          <div>
+            <p className={styles.statLabel}>Appointments today</p>
+            <p className={styles.statValue}>{todayCount}</p>
+            <p className={styles.statSub}>Not cancelled</p>
+          </div>
         </div>
-        <div className={`${styles.statCard} ${styles.amber}`}>
-          <p className={styles.statLabel}>Revenue this month</p>
-          <p className={styles.statValue}>{fmt(thisMonth)}</p>
-          <p className={`${styles.statTrend} ${revenueUp ? styles.trendUp : styles.trendDown}`}>
-            {revenueUp ? <TrendingUp size={11} strokeWidth={2.5} style={{ verticalAlign: '-1px' }} /> : <TrendingDown size={11} strokeWidth={2.5} style={{ verticalAlign: '-1px' }} />}
-            {' '}{Math.abs(((thisMonth - lastMonth) / lastMonth) * 100).toFixed(1)}% vs last month
-          </p>
+        <div className={styles.statCard}>
+          <span className={`${styles.statIcon} ${styles.toneAmber}`}><Inbox size={22} strokeWidth={2} /></span>
+          <div>
+            <p className={styles.statLabel}>Pending requests</p>
+            <p className={styles.statValue}>{pending}</p>
+            <p className={styles.statSub}>Waiting for confirmation</p>
+          </div>
         </div>
-        <div className={`${styles.statCard} ${styles.purple}`}>
-          <p className={styles.statLabel}>Departments</p>
-          <p className={styles.statValue}>{DEPARTMENTS.length}</p>
+        <div className={styles.statCard}>
+          <span className={`${styles.statIcon} ${styles.toneGreen}`}><Stethoscope size={22} strokeWidth={2} /></span>
+          <div>
+            <p className={styles.statLabel}>Active staff</p>
+            <p className={styles.statValue}>{activeStaff}</p>
+            <p className={styles.statSub}>of {staff.length} team members</p>
+          </div>
         </div>
       </div>
 
-      <div className={styles.grid}>
-        <div className={styles.mainCol}>
-          <div className={styles.card}>
-            <div className={styles.cardHeader}>
-              <h2 className={styles.cardTitle}>Revenue, last 6 months</h2>
+      <div className={styles.layout}>
+        <div className={styles.col}>
+          <section className={styles.panel}>
+            <div className={styles.panelHead}>
+              <h2 className={styles.panelTitle}>Appointments per month</h2>
+              <p className={styles.panelSub}>Last 6 months, cancelled bookings excluded</p>
             </div>
-            <div className={styles.chartWrap}>
-              {REVENUE.map((r) => (
-                <div key={r.month} className={styles.barCol}>
-                  <div className={styles.bar} style={{ height: `${(r.amount / maxRevenue) * 100}%` }} />
-                  <span className={styles.barLabel}>{r.month}</span>
+            <div className={styles.chart}>
+              {months.map((m) => (
+                <div key={m.key} className={styles.barCol}>
+                  <span className={styles.barValue}>{m.count}</span>
+                  <div className={styles.barTrack}>
+                    <div className={styles.bar} style={{ height: `${(m.count / maxMonth) * 100}%` }} />
+                  </div>
+                  <span className={styles.barLabel}>{m.label}</span>
                 </div>
               ))}
             </div>
-          </div>
+          </section>
 
-          <div className={styles.card}>
-            <div className={styles.cardHeader}>
-              <h2 className={styles.cardTitle}>Staff directory</h2>
-              <span className={styles.cardCount}>{STAFF.length} members</span>
+          <section className={styles.panel}>
+            <div className={styles.panelHead}>
+              <h2 className={styles.panelTitle}>Recent activity</h2>
+              <p className={styles.panelSub}>Bookings, new staff and messages as they happen</p>
             </div>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Department</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {STAFF.map((s) => (
-                  <tr key={s.name}>
-                    <td>
-                      <p className={styles.staffName}>{s.name}</p>
-                      <p className={styles.staffRole}>{s.role}</p>
-                    </td>
-                    <td>{s.dept}</td>
-                    <td><span className={`${styles.pill} ${STAFF_PILL[s.status]}`}>{s.status}</span></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+            {activity.length === 0 ? (
+              <div className={styles.empty}>
+                <p className={styles.emptyTitle}>No activity yet</p>
+                <p className={styles.emptyText}>New bookings and staff changes will show up here.</p>
+              </div>
+            ) : (
+              <ul className={styles.activityList}>
+                {activity.map((a) => {
+                  const Icon = ACTIVITY_ICON[a.kind];
+                  return (
+                    <li key={a.id} className={styles.activityItem}>
+                      <span className={styles.activityIcon}><Icon size={16} strokeWidth={2} /></span>
+                      <div className={styles.activityBody}>
+                        <p className={styles.activityText}>{a.text}</p>
+                        <p className={styles.activityTime}>{timeAgo(a.at)}</p>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </section>
         </div>
 
-        <div className={styles.sideCol}>
-          <div className={styles.card}>
-            <div className={styles.cardHeader}>
-              <h2 className={styles.cardTitle}>Department load</h2>
+        <div className={styles.col}>
+          <section className={styles.panel}>
+            <div className={styles.panelHead}>
+              <h2 className={styles.panelTitle}>Department load</h2>
+              <p className={styles.panelSub}>Busiest departments by bookings</p>
             </div>
-            {DEPARTMENTS.map((d) => (
-              <div key={d.name} className={styles.deptRow}>
-                <div className={styles.deptInfo}>
-                  <p className={styles.deptName}>{d.name}</p>
-                  <p className={styles.deptMeta}>{d.patients} patients</p>
-                </div>
-                <div className={styles.deptBarTrack}>
-                  <div className={styles.deptBarFill} style={{ width: `${d.load}%` }} />
-                </div>
-                <span className={styles.deptPct}>{d.load}%</span>
+            {deptList.length === 0 ? (
+              <div className={styles.empty}><p className={styles.emptyText}>No bookings yet.</p></div>
+            ) : (
+              <div className={styles.barList}>
+                {deptList.map(([name, count]) => (
+                  <div key={name}>
+                    <div className={styles.hTop}>
+                      <span className={styles.hName}>{name}</span>
+                      <span className={styles.hCount}>{count}</span>
+                    </div>
+                    <div className={styles.hTrack}>
+                      <div className={styles.hFill} style={{ width: `${(count / deptMax) * 100}%` }} />
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            )}
+          </section>
 
-          <div className={styles.card}>
-            <div className={styles.cardHeader}>
-              <h2 className={styles.cardTitle}>Recent activity</h2>
+          <section className={styles.panel}>
+            <div className={styles.panelHead}>
+              <h2 className={styles.panelTitle}>Team</h2>
+              <p className={styles.panelSub}>Staff by status</p>
             </div>
-            {ACTIVITY.map((a) => (
-              <div key={a.text} className={styles.activityRow}>
-                <span className={styles.activityDot} />
-                <div className={styles.activityInfo}>
-                  <p className={styles.activityText}>{a.text}</p>
-                  <p className={styles.activityTime}>{a.time}</p>
+            <div>
+              {team.map((t) => (
+                <div key={t.status} className={styles.teamRow}>
+                  <span className={`${styles.teamDot} ${t.dot}`} />
+                  <span className={styles.teamLabel}>{t.status}</span>
+                  <span className={styles.teamValue}>{t.count}</span>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          </section>
+
+          <section className={styles.panel}>
+            <div className={styles.panelHead}>
+              <h2 className={styles.panelTitle}>Quick actions</h2>
+            </div>
+            <div className={styles.quickGrid}>
+              {QUICK.map((q) => (
+                <Link key={q.href} href={q.href} className={styles.quickLink}>
+                  <span className={styles.quickIcon}><q.icon size={16} strokeWidth={2} /></span>
+                  <div>
+                    <p className={styles.quickTitle}>{q.title}</p>
+                    <p className={styles.quickSub}>{q.sub}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
         </div>
       </div>
     </div>

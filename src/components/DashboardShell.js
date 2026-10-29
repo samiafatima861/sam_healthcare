@@ -1,19 +1,72 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
-import {Bell, LogOut, LayoutDashboard, CalendarClock,FlaskConical, Pill, Users, Wallet, HelpCircle, ClipboardList, Building2, Activity, Receipt, ShieldCheck, HeartPulse,
-  ClipboardCheck, PackageSearch, DoorOpen} from 'lucide-react';
+import {
+  LogOut, LayoutDashboard, CalendarClock, FlaskConical, Pill, Users, Wallet, HelpCircle,
+  ClipboardList, Building2, Activity, Receipt, ShieldCheck, HeartPulse,
+  ClipboardCheck, PackageSearch, DoorOpen, Mail,
+} from 'lucide-react';
 import styles from '../assets/styles/DashboardShell.module.css';
+import NotificationBell from './NotificationBell';
+import { signOut } from '../lib/auth';
+import { supabase } from '../lib/supabaseClient';
 
+const ICONS = {
+  LayoutDashboard, CalendarClock, FlaskConical, Pill, Users, Wallet, ClipboardList, Building2,
+  Activity, Receipt, ShieldCheck, HeartPulse, ClipboardCheck, PackageSearch, DoorOpen, Mail,
+};
 
-const ICONS = { LayoutDashboard, CalendarClock, FlaskConical, Pill, Users, Wallet, ClipboardList, Building2, Activity, Receipt, ShieldCheck, HeartPulse,
-  ClipboardCheck, PackageSearch, DoorOpen  };
-
+function makeInitials(name) {
+  return (name || '')
+    .replace(/^(dr\.?|mr\.?|mrs\.?|ms\.?)\s+/i, '')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((part) => part[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
+}
 
 export default function DashboardShell({ roleLabel, navItems, userName, userInitials, children }) {
   const pathname = usePathname();
+  const [me, setMe] = useState(null);
+
+  // show the signed-in person's real name instead of the placeholder from the layout
+  useEffect(() => {
+    let active = true;
+
+    async function loadMe() {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name, email')
+        .eq('id', session.user.id)
+        .maybeSingle();
+
+      const name = profile?.full_name || session.user.user_metadata?.full_name || session.user.email || '';
+      if (active && name) setMe({ name });
+    }
+
+    loadMe();
+
+    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_OUT' && active) setMe(null);
+    });
+
+    return () => {
+      active = false;
+      sub.subscription.unsubscribe();
+    };
+  }, []);
+
+  const shownName = me?.name || userName;
+  const shownInitials = me ? makeInitials(me.name) : userInitials;
 
   return (
     <div className={styles.shell}>
@@ -24,16 +77,14 @@ export default function DashboardShell({ roleLabel, navItems, userName, userInit
         </div>
 
         <div className={styles.topbarRight}>
-          <button type="button" className={styles.iconBtn} aria-label="Notifications">
-            <Bell size={18} strokeWidth={2} />
-          </button>
+          <NotificationBell />
           <div className={styles.userChip}>
-            <span className={styles.avatar}>{userInitials}</span>
-            <span className={styles.userName}>{userName}</span>
+            <span className={styles.avatar}>{shownInitials}</span>
+            <span className={styles.userName}>{shownName}</span>
           </div>
-          <Link href="/" className={styles.logoutBtn} aria-label="Log out">
+          <button type="button" className={styles.logoutBtn} aria-label="Log out" onClick={signOut}>
             <LogOut size={17} strokeWidth={2} />
-          </Link>
+          </button>
         </div>
       </header>
 

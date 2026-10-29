@@ -1,3 +1,4 @@
+import AuthGate from '../../../components/AuthGate';
 import DashboardShell from '../../../components/DashboardShell';
 
 export const metadata = { title: 'Billing desk — Sam Healthcare' };
@@ -10,6 +11,7 @@ const NAV_ITEMS = [
 
 export default function BillingDeskLayout({ children }) {
   return (
+    <AuthGate allow={['billing']}>
     <DashboardShell
       roleLabel="Billing"
       navItems={NAV_ITEMS}
@@ -18,5 +20,6 @@ export default function BillingDeskLayout({ children }) {
     >
       {children}
     </DashboardShell>
+    </AuthGate>
   );
 }

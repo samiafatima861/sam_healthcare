@@ -1,8 +1,19 @@
-import Image from 'next/image';
-import { Phone, Mail, MapPin, Clock, Stethoscope, HeartPulse } from 'lucide-react';
+import { Phone, Mail, MapPin, Clock, Stethoscope, HeartPulse, ChevronDown, ArrowRight } from 'lucide-react';
+import ContactForm from '../../../components/ContactForm';
+import NewsletterForm from '../../../components/NewsletterForm';
+import CtaBanner from '../../../components/CtaBanner';
+import Footer from '../../../components/Footer';
 import styles from '../../../assets/styles/ContactPage.module.css';
 
 export const metadata = { title: 'Contact us — Sam Healthcare' };
+
+// Change these to your real details
+const PHONE = '+92 21 111 222 333';
+const EMAIL = 'info@samhealthcare.com';
+const ADDRESS = '12 Clifton Road, Karachi, Pakistan';
+
+const MAP_SRC = `https://www.google.com/maps?q=${encodeURIComponent(ADDRESS)}&output=embed`;
+const DIRECTIONS_URL = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(ADDRESS)}`;
 
 const BADGES = [
   { icon: Clock, label: '24/7 Emergency care' },
@@ -10,33 +21,29 @@ const BADGES = [
   { icon: HeartPulse, label: '10+ Departments' },
 ];
 
+const FAQS = [
+  { q: 'How quickly will I get a reply?', a: 'We usually reply to messages by email within a few hours during opening times, and by the next morning otherwise.' },
+  { q: 'Is this form for medical emergencies?', a: 'No. For an emergency, call us directly or come to the emergency department, which is open 24 hours a day.' },
+  { q: 'How do I book or change an appointment?', a: 'Use the Book appointment button on the site or in our mobile app. For changes, mention your name and appointment date in a message.' },
+  { q: 'Can I ask about my bill or insurance?', a: 'Yes. Choose "Billing" as the subject and include your invoice number if you have one.' },
+];
+
 export default function ContactPage() {
   return (
     <>
       <section className={styles.hero}>
-        <span className={styles.chevronTopLeft} aria-hidden="true">
-          <svg width="90" height="60" viewBox="0 0 90 60" fill="none">
-            <path d="M4 4L34 30L4 56" stroke="var(--brand-accent)" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" opacity="0.5" />
-            <path d="M30 4L60 30L30 56" stroke="var(--brand-accent)" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" opacity="0.3" />
-          </svg>
-        </span>
-        <span className={styles.chevronBottomRight} aria-hidden="true">
-          <svg width="90" height="60" viewBox="0 0 90 60" fill="none">
-            <path d="M4 4L34 30L4 56" stroke="var(--brand-accent)" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" opacity="0.5" />
-            <path d="M30 4L60 30L30 56" stroke="var(--brand-accent)" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" opacity="0.3" />
-          </svg>
-        </span>
-
         <div className={`container ${styles.heroInner}`}>
-          <h1 className={styles.heroTitle}>Contact us</h1>
-          <svg className={styles.wave} width="140" height="18" viewBox="0 0 140 18" fill="none">
-            <path d="M2 14C14 2 24 2 36 14C48 26 58 26 70 14C82 2 92 2 104 14C116 26 126 26 138 14" stroke="var(--brand-accent)" strokeWidth="3" strokeLinecap="round" />
-          </svg>
+          <span className={styles.eyebrow}>Contact us</span>
+          <h1 className={styles.heroTitle}>
+            We're here to <span className={styles.heroAccent}>help</span>
+          </h1>
           <p className={styles.heroSubtitle}>
-            Reach the front desk, ask a question, or find us on the map — we usually reply within a few hours.
+            Ask a question, reach the front desk, or find us on the map. A real person reads every message.
           </p>
         </div>
+      </section>
 
+      <section className={`container ${styles.badgeWrap}`}>
         <div className={styles.badgeStrip}>
           {BADGES.map((b) => (
             <div key={b.label} className={styles.badge}>
@@ -48,64 +55,116 @@ export default function ContactPage() {
       </section>
 
       <section className={`container ${styles.body}`}>
-        <div className={styles.formGrid}>
-          <form className={styles.form}>
-            <h2 className={styles.formTitle}>Send us a message</h2>
-            <div className={styles.fieldRow}>
-              <div className={styles.fieldCol}>
-                <label className={styles.fieldLabel} htmlFor="c-email">Email</label>
-                <input id="c-email" type="email" className={styles.input} placeholder="you@email.com" />
-              </div>
-              <div className={styles.fieldCol}>
-                <label className={styles.fieldLabel} htmlFor="c-phone">Phone</label>
-                <input id="c-phone" type="tel" className={styles.input} placeholder="+92 300 1234567" />
-              </div>
+        <div className={styles.mainGrid}>
+          <ContactForm />
+
+          <aside className={styles.sideCol}>
+            <div className={styles.infoCard}>
+  <div className={styles.infoHead}>
+    <h2 className={styles.infoHeading}>Get in touch</h2>
+    <p className={styles.infoIntro}>Call, email or visit us. We're happy to help.</p>
+  </div>
+
+  <ul className={styles.infoList}>
+    <li>
+      <a href={`tel:${PHONE.replace(/\s/g, '')}`} className={styles.infoItem}>
+        <span className={styles.infoIcon}><Phone size={18} strokeWidth={2} /></span>
+        <span className={styles.infoText}>
+          <span className={styles.infoLabel}>Call us</span>
+          <span className={styles.infoValue}>{PHONE}</span>
+        </span>
+        <ArrowRight size={16} strokeWidth={2} className={styles.infoArrow} />
+      </a>
+    </li>
+
+    <li>
+      <a href={`mailto:${EMAIL}`} className={styles.infoItem}>
+        <span className={styles.infoIcon}><Mail size={18} strokeWidth={2} /></span>
+        <span className={styles.infoText}>
+          <span className={styles.infoLabel}>Email us</span>
+          <span className={styles.infoValue}>{EMAIL}</span>
+        </span>
+        <ArrowRight size={16} strokeWidth={2} className={styles.infoArrow} />
+      </a>
+    </li>
+
+    <li>
+      <a href={DIRECTIONS_URL} target="_blank" rel="noopener noreferrer" className={styles.infoItem}>
+        <span className={styles.infoIcon}><MapPin size={18} strokeWidth={2} /></span>
+        <span className={styles.infoText}>
+          <span className={styles.infoLabel}>Visit us</span>
+          <span className={styles.infoValue}>{ADDRESS}</span>
+        </span>
+        <ArrowRight size={16} strokeWidth={2} className={styles.infoArrow} />
+      </a>
+    </li>
+
+    <li>
+      <div className={styles.infoItemStatic}>
+        <span className={styles.infoIcon}><Clock size={18} strokeWidth={2} /></span>
+        <span className={styles.infoText}>
+          <span className={styles.infoLabel}>Opening hours</span>
+          <span className={styles.infoValue}>OPD: 8:00 AM – 9:00 PM, every day</span>
+        </span>
+      </div>
+    </li>
+  </ul>
+
+  <div className={styles.emergencyStrip}>
+    <div>
+      <p className={styles.emergencyLabel}>Medical emergency?</p>
+      <p className={styles.emergencySub}>Our emergency department is open 24/7</p>
+    </div>
+    <a href={`tel:${PHONE.replace(/\s/g, '')}`} className={styles.emergencyBtn}>Call now</a>
+  </div>
+</div>
+
+            <div className={styles.newsletterCard}>
+              <NewsletterForm />
             </div>
-            <label className={styles.fieldLabel} htmlFor="c-name">Name</label>
-            <input id="c-name" type="text" className={styles.input} placeholder="Your name" />
-            <label className={styles.fieldLabel} htmlFor="c-message">Message</label>
-            <textarea id="c-message" className={styles.textarea} placeholder="How can we help?" />
-            <button type="button" className={styles.submitBtn}>Send message</button>
-          </form>
+          </aside>
+        </div>
 
-          <div className={styles.newsletterCard}>
-            <h3 className={styles.newsletterTitle}>Health tips, monthly</h3>
-            <p className={styles.newsletterText}>
-              Short, useful notes from our doctors — seasonal advice, checkup reminders, nothing spammy.
-            </p>
-            <input type="email" className={styles.newsletterInput} placeholder="Email" />
-            <button type="button" className={styles.newsletterBtn}>Subscribe</button>
+        <div className={styles.mapSection}>
+          <div className={styles.mapHeader}>
+            <div>
+              <h2 className={styles.sectionTitle}>Find <span className={styles.heroAccent}>us</span></h2>
+              <p className={styles.sectionSub}>{ADDRESS}</p>
+            </div>
+            <a href={DIRECTIONS_URL} target="_blank" rel="noopener noreferrer" className={styles.directionsBtn}>
+              Get directions <ArrowRight size={15} strokeWidth={2.25} />
+            </a>
+          </div>
+          <div className={styles.mapFrameWrap}>
+            <iframe
+              title="Sam Healthcare Hospital location"
+              src={MAP_SRC}
+              className={styles.mapFrame}
+              loading="lazy"
+              allowFullScreen
+              referrerPolicy="no-referrer-when-downgrade"
+            />
           </div>
         </div>
 
-        <div className={styles.infoGrid}>
-          <div className={styles.infoCard}>
-            <span className={styles.infoIcon}><Phone size={20} strokeWidth={2} /></span>
-            <h3 className={styles.infoTitle}>+92 21 111 222 333</h3>
-            <p className={styles.infoText}>Call the front desk, 8 AM – 10 PM daily.</p>
-          </div>
-          <div className={styles.infoCard}>
-            <span className={styles.infoIcon}><Mail size={20} strokeWidth={2} /></span>
-            <h3 className={styles.infoTitle}>info@samhealthcare.com</h3>
-            <p className={styles.infoText}>General questions, usually answered same day.</p>
-          </div>
-          <div className={styles.infoCard}>
-            <span className={styles.infoIcon}><MapPin size={20} strokeWidth={2} /></span>
-            <h3 className={styles.infoTitle}>12 Clifton Road, Karachi</h3>
-            <p className={styles.infoText}>Pakistan. Parking available on-site.</p>
-          </div>
-        </div>
-
-        <div className={styles.mapCard}>
-          <Image src="/images/facility.jpg" alt="Sam Healthcare location" fill className={styles.mapImage} />
-          <div className={styles.mapOverlay} />
-          <span className={styles.mapPin}><MapPin size={22} strokeWidth={2.5} /></span>
-          <div className={styles.mapCaption}>
-            <p className={styles.mapCaptionTitle}>Map coming soon</p>
-            <p className={styles.mapCaptionText}>An interactive map of our location will be added here.</p>
+        <div className={styles.faqSection}>
+          <h2 className={styles.sectionTitle}>Frequently asked <span className={styles.heroAccent}>questions</span></h2>
+          <div className={styles.faqList}>
+            {FAQS.map((f) => (
+              <details key={f.q} className={styles.faqItem}>
+                <summary className={styles.faqQuestion}>
+                  {f.q}
+                  <ChevronDown size={18} strokeWidth={2} className={styles.faqChevron} />
+                </summary>
+                <p className={styles.faqAnswer}>{f.a}</p>
+              </details>
+            ))}
           </div>
         </div>
       </section>
+
+      <CtaBanner />
+      <Footer />
     </>
   );
 }

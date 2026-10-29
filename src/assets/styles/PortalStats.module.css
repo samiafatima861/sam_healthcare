@@ -1,0 +1,85 @@
+.wrap { container-type: inline-size; }
+
+.row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 168px;
+  padding: 20px;
+  border-radius: 14px;
+  color: var(--white);
+  overflow: hidden;
+  box-shadow: 0 8px 22px rgba(3, 26, 71, 0.16);
+  transition: transform 0.15s var(--ease-standard), box-shadow 0.15s var(--ease-standard);
+}
+.card:hover { transform: translateY(-2px); box-shadow: 0 14px 30px rgba(3, 26, 71, 0.22); }
+
+/* soft decorative circle */
+.card::after {
+  content: '';
+  position: absolute;
+  right: -46px; top: -46px;
+  width: 150px; height: 150px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.07);
+  pointer-events: none;
+}
+
+.toneBlue { background: linear-gradient(135deg, var(--brand-900), #0A5C8C); }
+.toneTeal { background: linear-gradient(135deg, #025E5E, #02897B); }
+.toneDeep { background: linear-gradient(135deg, var(--brand-900), var(--brand-700)); }
+
+.top { display: flex; align-items: center; gap: 12px; position: relative; z-index: 1; }
+.iconTile {
+  width: 40px; height: 40px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.16);
+  flex-shrink: 0;
+}
+.label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.value {
+  position: relative; z-index: 1;
+  font-family: var(--font-display);
+  font-size: 1.625rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  color: var(--white);
+}
+.valueSmall { font-family: var(--font-body); font-size: 0.9375rem; font-weight: 500; letter-spacing: 0; color: rgba(255, 255, 255, 0.82); }
+.sub { position: relative; z-index: 1; font-size: 0.8125rem; color: rgba(255, 255, 255, 0.82); margin-top: 6px; line-height: 1.4; }
+
+.track { position: relative; z-index: 1; height: 6px; margin-top: 12px; background: rgba(255, 255, 255, 0.22); border-radius: var(--radius-pill); overflow: hidden; }
+.fill { height: 100%; background: var(--white); border-radius: var(--radius-pill); }
+
+.action {
+  position: relative; z-index: 1;
+  display: inline-flex; align-items: center; gap: 6px;
+  align-self: flex-start;
+  margin-top: auto;
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.16);
+  color: var(--white);
+  font-size: 0.75rem;
+  font-weight: 700;
+  transition: background 0.15s var(--ease-standard);
+}
+.action:hover { background: rgba(255, 255, 255, 0.28); }
+
+/* responds to the page's own width, not the screen */
+@container (max-width: 760px) {
+  .row { grid-template-columns: 1fr; }
+  .card { min-height: 0; }
+}

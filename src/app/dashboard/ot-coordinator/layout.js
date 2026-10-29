@@ -1,3 +1,4 @@
+import AuthGate from '@/components/AuthGate';
 import DashboardShell from '../../../components/DashboardShell';
 
 export const metadata = { title: 'OT coordination — Sam Healthcare' };
@@ -9,8 +10,10 @@ const NAV_ITEMS = [
 
 export default function OtCoordinatorLayout({ children }) {
   return (
+    <AuthGate allow={['ot-coordinator']}>
     <DashboardShell roleLabel="OT Coordinator" navItems={NAV_ITEMS} userName="Junaid Iqbal" userInitials="JI">
       {children}
     </DashboardShell>
+    </AuthGate>
   );
 }
