@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Search, Check, X, CalendarCheck, CalendarClock, Inbox, Users } from 'lucide-react';
+import { Check, X, CalendarCheck, CalendarClock, Inbox, Users } from 'lucide-react';
 import { supabase } from '../../../lib/supabaseClient';
 import { toISO, initials, titleCase, fmtTime, byDateTime, prettyDate } from '../../../lib/appointmentUtils';
 import styles from '../../../assets/styles/DoctorPages.module.css';
-
+import SearchInput from '../../SearchInput';
 const TABS = ['All', 'Pending', 'Confirmed', 'In consultation', 'Completed', 'Cancelled'];
 
 const STATUS_CHIP = {
@@ -143,17 +143,7 @@ export default function DoctorSchedule() {
           ))}
         </div>
 
-        <div className={styles.searchBox}>
-          <Search size={15} strokeWidth={2} className={styles.searchIcon} />
-          <input
-            type="search"
-            className={styles.searchInput}
-            placeholder="Search patient, phone or department"
-            aria-label="Search appointments"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-          />
-        </div>
+        <SearchInput width={260} label="Search staff" placeholder="Search name, role or email" value={query} onChange={setQuery} />
       </div>
 
       {orderedDates.length === 0 ? (

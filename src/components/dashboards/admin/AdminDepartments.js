@@ -1,11 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Plus, Pencil, Trash2, Building2, Search, Users, CalendarClock } from 'lucide-react';
+import { Plus, Pencil, Trash2, Building2, Users, CalendarClock } from 'lucide-react';
 import { supabase } from '../../../lib/supabaseClient';
 import { digits, norm } from '../../../lib/adminUtils';
 import AdminModal from './AdminModal';
 import styles from '../../../assets/styles/AdminDashboard.module.css';
+import SearchInput from '../../SearchInput';
 
 /* ---------- add / edit form ---------- */
 function DeptModal({ dept, existing, doctors, onClose, onSaved }) {
@@ -231,14 +232,7 @@ export default function AdminDepartments() {
       </div>
 
       <div className={styles.toolbar}>
-        <div className={styles.searchBox}>
-          <Search size={15} strokeWidth={2} className={styles.searchIcon} />
-          <input
-            type="search" className={styles.searchInput} aria-label="Search departments"
-            placeholder="Search departments"
-            value={query} onChange={(e) => setQuery(e.target.value)}
-          />
-        </div>
+        <SearchInput width={260} label="Search staff" placeholder="Search name, role or email" value={query} onChange={setQuery} />
       </div>
 
       {shown.length === 0 ? (

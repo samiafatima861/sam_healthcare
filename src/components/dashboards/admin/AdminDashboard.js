@@ -6,7 +6,7 @@ import {
   Users, CalendarCheck, Inbox, Stethoscope, CalendarClock, Mail, Building2,
 } from 'lucide-react';
 import { supabase } from '../../../lib/supabaseClient';
-import { toISO, titleCase } from '../../../lib/appointmentUtils';
+import { toISO, titleCase, initials, fmtTime, prettyDate } from '../../../lib/appointmentUtils';
 import { digits, norm, timeAgo } from '../../../lib/adminUtils';
 import styles from '../../../assets/styles/AdminDashboard.module.css';
 
@@ -62,6 +62,12 @@ export default function AdminDashboard() {
   const pending = appointments.filter((a) => a.status === 'Pending').length;
   const activeStaff = staff.filter((s) => s.status === 'Active').length;
   const newMessages = messages.filter((m) => m.status === 'New').length;
+
+  const latest = appointments
+  .filter((a) => a.created_at)
+  .sort((x, y) => new Date(y.created_at) - new Date(x.created_at))
+  .slice(0, 5);
+
 
   /* appointments per month, last 6 months */
   const base = new Date();
@@ -174,6 +180,32 @@ export default function AdminDashboard() {
 
       <div className={styles.layout}>
         <div className={styles.col}>
+
+          
+              <section className={styles.panel}>
+            <div className={styles.panelHead}>
+              <h2 className={styles.panelTitle}>Latest bookings</h2>
+              <p className={styles.panelSub}>Newest first, by when they were booked</p>
+            </div>
+            {latest.length === 0 ? (
+              <div className={styles.empty}><p className={styles.emptyText}>No bookings yet.</p></div>
+            ) : (
+              <ul className={styles.activityList}>
+                {latest.map((a) => (
+                  <li key={a.id} className={styles.activityItem}>
+                    <span className={styles.avatar}>{initials(a.patient_name)}</span>
+                    <div className={styles.activityBody}>
+                      <p className={styles.activityText}>{a.patient_name} · {titleCase(a.department)}</p>
+                      <p className={styles.activityTime}>
+                        {prettyDate(a.appointment_date, { day: 'numeric', month: 'short' })} · {fmtTime(a.appointment_time)} · {a.doctor_name} · booked {timeAgo(a.created_at)}
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+
           <section className={styles.panel}>
             <div className={styles.panelHead}>
               <h2 className={styles.panelTitle}>Appointments per month</h2>

@@ -8,21 +8,14 @@ import styles from '../assets/styles/BookingFlow.module.css';
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const STEPS = ['Department', 'Doctor', 'Date & time', 'Your details'];
 
-const DEPARTMENTS = [
-  { name: 'General Physician', icon: Stethoscope, blurb: 'Checkups and everyday health concerns' },
-  { name: 'Cardiology', icon: HeartPulse, blurb: 'Heart and blood pressure care' },
-  { name: 'Dermatology', icon: Sparkles, blurb: 'Skin, hair and nail conditions' },
-  { name: 'Orthopedics', icon: Bone, blurb: 'Bones, joints and sports injuries' },
-  { name: 'Pediatrics', icon: Baby, blurb: 'Care for infants and children' },
-];
-
-const DOCTORS = {
-  'General Physician': [{ name: 'Dr. Priya Sharma', title: 'Consultant Physician' }],
-  Cardiology: [{ name: 'Dr. Arjun Mehta', title: 'Consultant Cardiologist' }],
-  Dermatology: [{ name: 'Dr. Neha Verma', title: 'Consultant Dermatologist' }],
-  Orthopedics: [{ name: 'Dr. Omar Siddiqui', title: 'Orthopedic Surgeon' }],
-  Pediatrics: [{ name: 'Dr. Priya Sharma', title: 'Consultant Physician' }],
+const DEPT_META = {
+  'General Physician': { icon: Stethoscope, blurb: 'Checkups and everyday health concerns' },
+  Cardiology: { icon: HeartPulse, blurb: 'Heart and blood pressure care' },
+  Dermatology: { icon: Sparkles, blurb: 'Skin, hair and nail conditions' },
+  Orthopedics: { icon: Bone, blurb: 'Bones, joints and sports injuries' },
+  Pediatrics: { icon: Baby, blurb: 'Care for infants and children' },
 };
+const DEFAULT_META = { icon: Stethoscope, blurb: 'Specialist care' };
 
 /* ---------- helpers ---------- */
 function minutesToLabel(m) {
@@ -102,11 +95,51 @@ export default function BookingFlow() {
   const [serverError, setServerError] = useState('');
   const [confirmed, setConfirmed] = useState(null);
 
+  const [roster, setRoster] = useState([]);
+  const [rosterState, setRosterState] = useState('loading'); // loading | ready | failed
+
+  // doctors and departments come from the staff table, so new doctors appear automatically
+  useEffect(() => {
+    supabase.rpc('bookable_doctors').then(({ data, error }) => {
+      if (error) {
+        setRosterState('failed');
+        return;
+      }
+      setRoster(data || []);
+      setRosterState('ready');
+    });
+  }, []);
+
+  const DEPARTMENTS = [...new Set(roster.map((r) => r.department))].map((name) => ({
+    name,
+    ...(DEPT_META[name] || DEFAULT_META),
+  }));
+
+  const DOCTORS = {};
+  roster.forEach((r) => {
+    if (!DOCTORS[r.department]) DOCTORS[r.department] = [];
+    DOCTORS[r.department].push({ name: r.full_name, title: `${r.department} specialist` });
+  });
+
   // Dates are built after mount so server and browser time zones can't disagree
   useEffect(() => { setDays(nextDays(7)); }, []);
 
+  // opened from a department card, e.g. /book?department=Cardiology
+  useEffect(() => {
+    if (rosterState !== 'ready') return;
+    const wanted = new URLSearchParams(window.location.search).get('department');
+    const match = DEPARTMENTS.find((d) => d.name.toLowerCase() === (wanted || '').toLowerCase());
+    if (match) {
+      setDepartment(match.name);
+      const list = DOCTORS[match.name] || [];
+      setDoctor(list.length === 1 ? list[0].name : '');
+      setStep(1);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rosterState]);
+
   // Look up slots already booked for this doctor on this day
-    useEffect(() => {
+  useEffect(() => {
     if (!doctor || !date) { setTaken([]); return; }
     let cancelled = false;
     supabase
@@ -138,7 +171,7 @@ export default function BookingFlow() {
 
   function chooseDepartment(name) {
     setDepartment(name);
-    const list = DOCTORS[name];
+    const list = DOCTORS[name] || [];
     setDoctor(list.length === 1 ? list[0].name : '');
     setDate('');
     setTime('');
@@ -246,6 +279,15 @@ export default function BookingFlow() {
           <>
             <h2 className={styles.stepTitle}>Choose a department</h2>
             <p className={styles.stepHint}>Pick the area of care you need.</p>
+
+            {rosterState === 'loading' && <p className={styles.stepHint}>Loading departments...</p>}
+            {rosterState === 'failed' && (
+              <p className={styles.serverError}>Could not load doctors. Please refresh the page or call the front desk.</p>
+            )}
+            {rosterState === 'ready' && DEPARTMENTS.length === 0 && (
+              <p className={styles.stepHint}>No doctors are available for booking yet.</p>
+            )}
+
             <div className={styles.optionGrid}>
               {DEPARTMENTS.map((d) => (
                 <button

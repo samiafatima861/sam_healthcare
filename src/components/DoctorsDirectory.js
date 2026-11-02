@@ -3,8 +3,9 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Search, Star, CalendarPlus } from 'lucide-react';
+import { Star, CalendarPlus } from 'lucide-react';
 import styles from '../assets/styles/DoctorsPage.module.css';
+import SearchInput from '../../SearchInput';
 
 // Edit this list: photos, ratings and fees here are placeholders
 const DOCTORS = [
@@ -57,17 +58,7 @@ export default function DoctorsDirectory() {
   return (
     <>
       <div className={styles.toolbar}>
-        <div className={styles.searchBox}>
-          <Search size={17} strokeWidth={2} className={styles.searchIcon} />
-          <input
-            type="search"
-            className={styles.searchInput}
-            placeholder="Search by doctor name or department"
-            aria-label="Search doctors"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-          />
-        </div>
+        <SearchInput width={260} label="Search staff" placeholder="Search name, role or email" value={query} onChange={setQuery} />
 
         <div className={styles.chips}>
           {DEPARTMENTS.map((d) => (

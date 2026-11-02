@@ -1,12 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Plus, Search, Pencil, Trash2, Users, Check, Clock, X } from 'lucide-react';
+import { Plus, Pencil, Trash2, Users, Check, Clock, X, Eye, EyeOff  } from 'lucide-react';
 import { supabase } from '../../../lib/supabaseClient';
 import { initials } from '../../../lib/appointmentUtils';
 import { EMAIL_RE, validPhone, norm } from '../../../lib/adminUtils';
 import AdminModal from './AdminModal';
 import styles from '../../../assets/styles/AdminDashboard.module.css';
+import { callStaffApi } from '../../../lib/adminApi';
+import SearchInput from '../../SearchInput';
 
 const ROLES = ['Doctor', 'Nurse', 'Receptionist', 'Pharmacist', 'Lab technician', 'OT coordinator', 'Billing officer', 'Administrator'];
 const STATUSES = ['Active', 'On leave', 'Inactive'];
@@ -19,6 +21,16 @@ const STATUS_CHIP = {
 };
 
 /* ---------- add / edit form ---------- */
+function generatePassword() {
+  const letters = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz';
+  const nums = '23456789';
+  const all = letters + nums;
+  const pick = (set) => set[crypto.getRandomValues(new Uint32Array(1))[0] % set.length];
+  const out = [pick(letters), pick(nums)];
+  while (out.length < 12) out.push(pick(all));
+  return out.sort(() => Math.random() - 0.5).join('');
+}
+
 function StaffModal({ member, departments, existing, onClose, onSaved }) {
   const isEdit = !!member;
   const [v, setV] = useState({
@@ -28,7 +40,9 @@ function StaffModal({ member, departments, existing, onClose, onSaved }) {
     email: member?.email || '',
     phone: member?.phone || '',
     status: member?.status || 'Active',
+    password: '',
   });
+  const [showPw, setShowPw] = useState(false);
   const [touched, setTouched] = useState({});
   const [saving, setSaving] = useState(false);
   const [serverError, setServerError] = useState('');
@@ -41,6 +55,10 @@ function StaffModal({ member, departments, existing, onClose, onSaved }) {
     errors.email = 'A staff member with this email already exists.';
   }
   if (v.phone.trim() && !validPhone(v.phone)) errors.phone = 'Enter a valid phone number (7–15 digits).';
+  if (!isEdit) {
+    if (v.password.length < 8) errors.password = 'Use at least 8 characters.';
+    else if (!/[A-Za-z]/.test(v.password) || !/\d/.test(v.password)) errors.password = 'Include both letters and numbers.';
+  }
 
   const show = (f) => touched[f] && errors[f];
   const set = (k) => (e) => setV((x) => ({ ...x, [k]: e.target.value }));
@@ -52,7 +70,7 @@ function StaffModal({ member, departments, existing, onClose, onSaved }) {
 
   async function submit(e) {
     e.preventDefault();
-    setTouched({ full_name: true, email: true, phone: true });
+    setTouched({ full_name: true, email: true, phone: true, password: true });
     if (Object.keys(errors).length > 0) return;
 
     setSaving(true);
@@ -67,23 +85,31 @@ function StaffModal({ member, departments, existing, onClose, onSaved }) {
       status: v.status,
     };
 
-    const query = isEdit
-      ? supabase.from('staff').update(payload).eq('id', member.id)
-      : supabase.from('staff').insert(payload);
-    const { data, error } = await query.select().single();
-    setSaving(false);
-
-    if (error || !data) {
-      setServerError('Could not save this staff member. Please try again.');
+    if (isEdit) {
+      const { data, error } = await supabase.from('staff').update(payload).eq('id', member.id).select().single();
+      setSaving(false);
+      if (error || !data) {
+        setServerError('Could not save this staff member. Please try again.');
+        return;
+      }
+      onSaved(data, true);
       return;
     }
-    onSaved(data, isEdit);
+
+    try {
+      const { staff } = await callStaffApi({ mode: 'create', ...payload, password: v.password });
+      setSaving(false);
+      onSaved(staff, false);
+    } catch (err) {
+      setSaving(false);
+      setServerError(err.message);
+    }
   }
 
   return (
     <AdminModal
       title={isEdit ? 'Edit staff member' : 'Add staff member'}
-      subtitle={isEdit ? 'Update their details or status.' : 'Add a new person to the hospital team.'}
+      subtitle={isEdit ? 'Update their details or status.' : 'Creates their login. They sign in with this email and password.'}
       onClose={onClose}
     >
       <form onSubmit={submit} noValidate>
@@ -105,7 +131,7 @@ function StaffModal({ member, departments, existing, onClose, onSaved }) {
             </select>
           </div>
           <div className={styles.field}>
-            <label className={styles.label} htmlFor="sf-dept">Department <span className={styles.optional}>(optional)</span></label>
+            <label className={styles.label} htmlFor="sf-dept">Department <span className={styles.optional}>(needed for doctors)</span></label>
             <select id="sf-dept" className={styles.input} value={v.department} onChange={set('department')}>
               <option value="">None</option>
               {deptOptions.map((d) => <option key={d} value={d}>{d}</option>)}
@@ -121,7 +147,34 @@ function StaffModal({ member, departments, existing, onClose, onSaved }) {
             value={v.email} onChange={set('email')} onBlur={blur('email')}
           />
           {show('email') && <p className={styles.errorText}>{errors.email}</p>}
+          {isEdit && <p className={styles.hint}>Changing this does not change their sign-in email.</p>}
         </div>
+
+        {!isEdit && (
+          <div className={styles.field}>
+            <label className={styles.label} htmlFor="sf-password">Initial password</label>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <input
+                id="sf-password" type={showPw ? 'text' : 'password'} autoComplete="new-password"
+                className={`${styles.input} ${show('password') ? styles.inputError : ''}`}
+                placeholder="At least 8 characters"
+                value={v.password} onChange={set('password')} onBlur={blur('password')}
+              />
+              <button type="button" className={styles.iconBtn} aria-label={showPw ? 'Hide password' : 'Show password'} onClick={() => setShowPw((x) => !x)}>
+                {showPw ? <EyeOff size={15} strokeWidth={2} /> : <Eye size={15} strokeWidth={2} />}
+              </button>
+              <button
+                type="button" className={`${styles.btn} ${styles.btnSm}`}
+                onClick={() => { setV((x) => ({ ...x, password: generatePassword() })); setShowPw(true); }}
+              >
+                Generate
+              </button>
+            </div>
+            {show('password')
+              ? <p className={styles.errorText}>{errors.password}</p>
+              : <p className={styles.hint}>Give it to them privately. They can change it with "Forgot password".</p>}
+          </div>
+        )}
 
         <div className={styles.fieldRow}>
           <div className={styles.field}>
@@ -282,14 +335,7 @@ export default function AdminStaff() {
             <option value="All">All roles</option>
             {roleOptions.map((r) => <option key={r} value={r}>{r}</option>)}
           </select>
-          <div className={styles.searchBox}>
-            <Search size={15} strokeWidth={2} className={styles.searchIcon} />
-            <input
-              type="search" className={styles.searchInput} aria-label="Search staff"
-              placeholder="Search name, role or email"
-              value={query} onChange={(e) => setQuery(e.target.value)}
-            />
-          </div>
+           <SearchInput width={260} label="Search staff" placeholder="Search name, role or email" value={query} onChange={setQuery} />
         </div>
       </div>
 

@@ -1,11 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Search, Mail, Trash2, Check, ChevronDown } from 'lucide-react';
+import { Mail, Trash2, Check, ChevronDown } from 'lucide-react';
 import { supabase } from '../../../lib/supabaseClient';
 import { norm, timeAgo } from '../../../lib/adminUtils';
 import AdminModal from './AdminModal';
 import styles from '../../../assets/styles/AdminDashboard.module.css';
+import SearchInput from '../../SearchInput';
 
 const TABS = ['All', 'New', 'Read', 'Resolved'];
 const STATUS_CHIP = { New: styles.chipNew, Read: styles.chipRead, Resolved: styles.chipResolved };
@@ -110,14 +111,7 @@ export default function AdminMessages() {
           ))}
         </div>
 
-        <div className={styles.searchBox}>
-          <Search size={15} strokeWidth={2} className={styles.searchIcon} />
-          <input
-            type="search" className={styles.searchInput} aria-label="Search messages"
-            placeholder="Search name, email or text"
-            value={query} onChange={(e) => setQuery(e.target.value)}
-          />
-        </div>
+        <SearchInput width={260} label="Search staff" placeholder="Search name, role or email" value={query} onChange={setQuery} />
       </div>
 
       {shown.length === 0 ? (

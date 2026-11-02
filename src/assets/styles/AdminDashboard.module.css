@@ -309,6 +309,17 @@
 .amount { font-weight: 700; white-space: nowrap; }
 .noWrap { white-space: nowrap; }
 
+.filterBar { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px; margin-bottom: 12px; }
+.filterField { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.filterLabel { font-size: 0.6875rem; font-weight: 600; color: var(--text-secondary); }
+.resultLine { font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 8px; }
+.pillNew {
+  display: inline-block; margin-left: 8px; vertical-align: middle;
+  font-size: 0.625rem; font-weight: 700;
+  padding: 2px 8px; border-radius: var(--radius-pill);
+  background: var(--brand-accent); color: var(--white);
+}
+
 
 /* ---------- responsive: thresholds are low so wide layouts stay wide ---------- */
 @container (max-width: 760px) {

@@ -10,6 +10,7 @@ const NAV_ITEMS = [
   { label: 'Appointments', href: '/dashboard/admin/appointments', icon: 'CalendarClock' },
   { label: 'Revenue', href: '/dashboard/admin/revenue', icon: 'Wallet' },
   { label: 'Messages', href: '/dashboard/admin/messages', icon: 'Mail' },
+    { label: 'Sign-ups', href: '/dashboard/admin/signups', icon: 'ClipboardCheck' },
 ];
 
 

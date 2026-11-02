@@ -2,13 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import {
-  Plus, Search, Trash2, Check, Wallet, Clock, FileText, TrendingUp, TrendingDown,
+  Plus, Trash2, Check, Wallet, Clock, FileText, TrendingUp, TrendingDown,
 } from 'lucide-react';
 import { supabase } from '../../../lib/supabaseClient';
 import { pad, initials, prettyDate } from '../../../lib/appointmentUtils';
 import { validPhone, norm } from '../../../lib/adminUtils';
 import AdminModal from './AdminModal';
 import styles from '../../../assets/styles/AdminDashboard.module.css';
+import SearchInput from '../../SearchInput';
 
 const METHODS = ['Cash', 'Card', 'Bank transfer', 'Insurance'];
 const TABS = ['All', 'Pending', 'Paid'];
@@ -379,14 +380,7 @@ export default function AdminRevenue() {
             </button>
           ))}
         </div>
-        <div className={styles.searchBox}>
-          <Search size={15} strokeWidth={2} className={styles.searchIcon} />
-          <input
-            type="search" className={styles.searchInput} aria-label="Search invoices"
-            placeholder="Search patient, invoice or description"
-            value={query} onChange={(e) => setQuery(e.target.value)}
-          />
-        </div>
+        <SearchInput width={260} label="Search staff" placeholder="Search name, role or email" value={query} onChange={setQuery} />
       </div>
 
       <div className={styles.tablePanel}>
