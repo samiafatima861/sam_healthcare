@@ -5,8 +5,11 @@ import Link from 'next/link';
 import { Check, X, CalendarCheck, CalendarClock, Inbox, Users } from 'lucide-react';
 import { supabase } from '../../../lib/supabaseClient';
 import { toISO, initials, titleCase, fmtTime, byDateTime, prettyDate } from '../../../lib/appointmentUtils';
-import styles from '../../../assets/styles/DoctorPages.module.css';
+import { digitsOnly } from '../../../lib/masks';
+import { useNewSince } from '../../../lib/useNewSince';
 import SearchInput from '../../SearchInput';
+import styles from '../../../assets/styles/DoctorPages.module.css';
+
 const TABS = ['All', 'Pending', 'Confirmed', 'In consultation', 'Completed', 'Cancelled'];
 
 const STATUS_CHIP = {
@@ -35,8 +38,12 @@ export default function DoctorSchedule() {
   const [tab, setTab] = useState('All');
   const [query, setQuery] = useState('');
 
+  // marks bookings made since the doctor last looked at this page
+  const { isNew, markAllSeen } = useNewSince('appointments_doctor');
+
   useEffect(() => {
     setToday(toISO(new Date()));
+
     supabase
       .from('appointments')
       .select('*')
@@ -46,6 +53,16 @@ export default function DoctorSchedule() {
         else setAppointments(data || []);
         setLoading(false);
       });
+
+    // a new booking for this doctor appears without a refresh
+    const channel = supabase
+      .channel('doctor-schedule')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'appointments' }, (payload) => {
+        setAppointments((list) => (list.some((x) => x.id === payload.new.id) ? list : [...list, payload.new]));
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
   }, []);
 
   async function updateStatus(id, status) {
@@ -80,12 +97,18 @@ export default function DoctorSchedule() {
     completed: countFor('Completed'),
   };
 
+  const newCount = appointments.filter(isNew).length;
+
   const q = query.trim().toLowerCase();
-  const filtered = appointments.filter(
-    (a) =>
-      (tab === 'All' || a.status === tab) &&
-      (!q || [a.patient_name, a.patient_phone, a.department, a.doctor_name, a.reason].some((v) => (v || '').toLowerCase().includes(q)))
-  );
+  const qDigits = digitsOnly(query);
+  const phoneSearch = qDigits.length >= 3 && !/\p{L}/u.test(query);
+
+  const filtered = appointments.filter((a) => {
+    if (tab !== 'All' && a.status !== tab) return false;
+    if (!q) return true;
+    if (phoneSearch) return digitsOnly(a.patient_phone).includes(qDigits);
+    return [a.patient_name, a.department, a.doctor_name, a.reason].some((v) => (v || '').toLowerCase().includes(q));
+  });
 
   const byDate = {};
   filtered.forEach((a) => {
@@ -109,6 +132,13 @@ export default function DoctorSchedule() {
 
       {error && <p className={styles.flashError}>Could not load appointments: {error}</p>}
       {actionError && <p className={styles.flashError}>{actionError}</p>}
+
+      {newCount > 0 && (
+        <div className={styles.newBanner}>
+          <span><strong>{newCount}</strong> new booking{newCount === 1 ? '' : 's'} since your last visit</span>
+          <button type="button" className={styles.btn} onClick={markAllSeen}>Mark all as seen</button>
+        </div>
+      )}
 
       <div className={styles.statRow}>
         <div className={styles.statCard}>
@@ -143,7 +173,11 @@ export default function DoctorSchedule() {
           ))}
         </div>
 
-        <SearchInput width={260} label="Search staff" placeholder="Search name, role or email" value={query} onChange={setQuery} />
+        <SearchInput
+          mask="smart" width={280} label="Search appointments"
+          placeholder="Patient name or phone number"
+          value={query} onChange={setQuery}
+        />
       </div>
 
       {orderedDates.length === 0 ? (
@@ -175,6 +209,7 @@ export default function DoctorSchedule() {
                       <span className={styles.avatar}>{initials(a.patient_name)}</span>
                       <div className={styles.info}>
                         <Link href={patientHref} className={styles.nameLink}>{a.patient_name}</Link>
+                        {isNew(a) && <span className={styles.pillNew}>New</span>}
                         <p className={styles.meta}>
                           {titleCase(a.department)} · {a.doctor_name}{a.reason ? ` · ${a.reason}` : ''}
                         </p>
