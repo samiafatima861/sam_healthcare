@@ -7,7 +7,7 @@ import { Heart, Brain, Bone, Baby, Sparkles, Ear, Eye, MessageCircle, Droplets,
   Stethoscope, CalendarPlus, ArrowRight, X, Check, Clock,
 } from 'lucide-react';
 import styles from '../assets/styles/DepartmentsPage.module.css';
-import SearchInput from '../../SearchInput';
+import SearchInput from './SearchInput';
 
 // Edit this list: the treatments below are placeholders, so replace them with what each department really offers
 const DEPARTMENTS = [

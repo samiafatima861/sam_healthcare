@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Star, CalendarPlus } from 'lucide-react';
 import styles from '../assets/styles/DoctorsPage.module.css';
-import SearchInput from '../../SearchInput';
+import SearchInput from './SearchInput';
 
 // Edit this list: photos, ratings and fees here are placeholders
 const DOCTORS = [
