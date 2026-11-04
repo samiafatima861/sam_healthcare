@@ -1,41 +1,25 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import {
-  FlaskConical,
-  Download,
-  ChevronRight,
-  CalendarPlus,
-  ClipboardList,
-} from 'lucide-react';
+import { FlaskConical, ChevronRight, CalendarPlus, ClipboardList } from 'lucide-react';
 import Link from 'next/link';
 import { supabase } from '../../../lib/supabaseClient';
+import { toISO, titleCase, fmtTime, byDateTime, prettyDate } from '../../../lib/appointmentUtils';
+import { formatSlot } from '../../../lib/time';
 import PortalStats from './PortalStats';
 import styles from '../../../assets/styles/PatientPortal.module.css';
 
-const VISITS = [
-  { doctor: 'Dr. Priya Sharma', specialty: 'General Physician', date: 'Today, 4:40 PM', status: 'Upcoming' },
-  { doctor: 'Dr. Arjun Mehta', specialty: 'Cardiologist', date: '12 Sep 2026', status: 'Completed' },
-  { doctor: 'Dr. Neha Verma', specialty: 'Dermatologist', date: '2 Aug 2026', status: 'Completed' },
-];
+const OPEN = ['Pending', 'Confirmed', 'In consultation'];
 
-const LAB_REPORTS = [
-  { name: 'Complete Blood Count', date: '12 Sep 2026', status: 'Ready' },
-  { name: 'Lipid Profile', date: '12 Sep 2026', status: 'Ready' },
-  { name: 'Thyroid Panel', date: '20 Sep 2026', status: 'Pending' },
-];
-
-const HISTORY = [
-  { title: 'Hypertension', detail: 'Diagnosed 2021 · On medication', type: 'Condition' },
-  { title: 'Penicillin allergy', detail: 'Reaction: skin rash', type: 'Allergy' },
-  { title: 'Appendectomy', detail: 'March 2018', type: 'Surgery' },
-];
-
-const HISTORY_PILL = {
-  Condition: 'pillWarn',
-  Allergy: 'pillDanger',
-  Surgery: 'pillUpcoming',
+const VISIT_PILL = {
+  Pending: styles.pillWarn,
+  Confirmed: styles.pillUpcoming,
+  'In consultation': styles.pillUpcoming,
+  Completed: styles.pillDone,
+  Cancelled: styles.pillDanger,
 };
+
+const emptyText = { fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', padding: '8px 0', lineHeight: 1.6 };
 
 function firstNameOf(full) {
   const cleaned = (full || '').replace(/^(dr\.?|mr\.?|mrs\.?|ms\.?)\s+/i, '').trim();
@@ -43,29 +27,68 @@ function firstNameOf(full) {
   return first ? first.charAt(0).toUpperCase() + first.slice(1) : '';
 }
 
+const listOf = (text) => (text || '').split(/[,\n]/).map((s) => s.trim()).filter(Boolean);
+
+function whenOf(a) {
+  if (!a.appointment_at) return `${prettyDate(a.appointment_date)}, ${fmtTime(a.appointment_time)}`;
+  return formatSlot(a).local;
+}
+
 export default function PatientPortal() {
   const [firstName, setFirstName] = useState('');
+  const [info, setInfo] = useState(null);
+  const [appointments, setAppointments] = useState([]);
+  const [today, setToday] = useState(null);
 
   useEffect(() => {
     let active = true;
+    setToday(toISO(new Date()));
 
-    async function loadName() {
+    async function load() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
 
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('full_name')
-        .eq('id', session.user.id)
-        .maybeSingle();
+      const [profileRes, apptRes] = await Promise.all([
+        supabase.from('profiles').select('*').eq('id', session.user.id).maybeSingle(),
+        supabase.from('my_appointments').select('*').order('created_at', { ascending: false }).limit(50),
+      ]);
 
+      if (!active) return;
+      const profile = profileRes.data;
       const name = firstNameOf(profile?.full_name || session.user.user_metadata?.full_name || session.user.email?.split('@')[0]);
-      if (active && name) setFirstName(name);
+      if (name) setFirstName(name);
+      setInfo(profile || {});
+      if (!apptRes.error) setAppointments(apptRes.data || []);
     }
 
-    loadName();
+    load();
     return () => { active = false; };
   }, []);
+
+  const upcoming = today
+    ? appointments.filter((a) => OPEN.includes(a.status) && a.appointment_date >= today).sort(byDateTime)
+    : [];
+  const next = upcoming[0];
+  const recent = [...appointments].sort((x, y) => byDateTime(y, x)).slice(0, 3);
+
+  const nextAppointment = next
+    ? { when: whenOf(next), doctor: next.doctor_name, department: titleCase(next.department) }
+    : { when: 'None booked', doctor: 'Book your next visit', department: 'it takes a minute' };
+
+  const history = [
+    ...listOf(info?.conditions).map((t) => ({ title: t, detail: 'Condition on your record', type: 'Condition' })),
+    ...listOf(info?.allergies).map((t) => ({ title: t, detail: 'Allergy on your record', type: 'Allergy' })),
+  ].slice(0, 5);
+
+  const infoRows = [
+    ['Gender', info?.gender],
+    ['Blood type', info?.blood_type],
+    ['Allergies', info?.allergies],
+    ['Conditions', info?.conditions],
+    ['Height', info?.height_cm ? `${info.height_cm} cm` : ''],
+    ['Weight', info?.weight_kg ? `${info.weight_kg} kg` : ''],
+    ['Phone', info?.phone],
+  ];
 
   return (
     <div className={styles.wrap}>
@@ -80,7 +103,7 @@ export default function PatientPortal() {
         </Link>
       </div>
 
-      <PortalStats />
+      <PortalStats nextAppointment={nextAppointment} labs={{ ready: 0, total: 0 }} balance={0} />
 
       <div className={styles.grid}>
         <div className={styles.mainCol}>
@@ -91,23 +114,27 @@ export default function PatientPortal() {
                 View all <ChevronRight size={14} strokeWidth={2.5} />
               </Link>
             </div>
-            <div className={styles.list}>
-              {VISITS.map((v) => (
-                <div key={v.doctor + v.date} className={styles.visitRow}>
-                  <span className={styles.visitAvatar}>{v.doctor.split(' ')[2]?.[0] || v.doctor[4]}</span>
-                  <div className={styles.visitInfo}>
-                    <p className={styles.visitDoctor}>{v.doctor}</p>
-                    <p className={styles.visitSpecialty}>{v.specialty}</p>
-                  </div>
-                  <div className={styles.visitRight}>
-                    <p className={styles.visitDate}>{v.date}</p>
-                    <span className={`${styles.pill} ${v.status === 'Upcoming' ? styles.pillUpcoming : styles.pillDone}`}>
-                      {v.status}
+            {recent.length === 0 ? (
+              <p style={emptyText}>No visits yet. Bookings you make while signed in appear here.</p>
+            ) : (
+              <div className={styles.list}>
+                {recent.map((a) => (
+                  <div key={a.id} className={styles.visitRow}>
+                    <span className={styles.visitAvatar}>
+                      {(a.doctor_name || '?').replace(/^dr\.?\s+/i, '').charAt(0).toUpperCase()}
                     </span>
+                    <div className={styles.visitInfo}>
+                      <p className={styles.visitDoctor}>{a.doctor_name}</p>
+                      <p className={styles.visitSpecialty}>{titleCase(a.department)}</p>
+                    </div>
+                    <div className={styles.visitRight}>
+                      <p className={styles.visitDate}>{whenOf(a)}</p>
+                      <span className={`${styles.pill} ${VISIT_PILL[a.status] || styles.pillDone}`}>{a.status}</span>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className={styles.card}>
@@ -117,26 +144,12 @@ export default function PatientPortal() {
                 View all <ChevronRight size={14} strokeWidth={2.5} />
               </Link>
             </div>
-            <div className={styles.list}>
-              {LAB_REPORTS.map((r) => (
-                <div key={r.name} className={styles.reportRow}>
-                  <div className={styles.reportIconWrap}>
-                    <FlaskConical size={16} strokeWidth={2} />
-                  </div>
-                  <div className={styles.reportInfo}>
-                    <p className={styles.reportName}>{r.name}</p>
-                    <p className={styles.reportDate}>{r.date}</p>
-                  </div>
-                  {r.status === 'Ready' ? (
-                    <Link href="/portal/lab-reports" className={styles.downloadBtn}>
-                      <Download size={14} strokeWidth={2} />
-                      Download
-                    </Link>
-                  ) : (
-                    <span className={`${styles.pill} ${styles.pillWarn}`}>Pending</span>
-                  )}
-                </div>
-              ))}
+            <div className={styles.reportRow}>
+              <div className={styles.reportIconWrap}><FlaskConical size={16} strokeWidth={2} /></div>
+              <div className={styles.reportInfo}>
+                <p className={styles.reportName}>No lab reports yet</p>
+                <p className={styles.reportDate}>Results will appear here once your lab uploads them.</p>
+              </div>
             </div>
           </div>
         </div>
@@ -149,20 +162,22 @@ export default function PatientPortal() {
                 View all <ChevronRight size={14} strokeWidth={2.5} />
               </Link>
             </div>
-            <div className={styles.historyList}>
-              {HISTORY.map((h) => (
-                <div key={h.title} className={styles.historyRow}>
-                  <span className={styles.historyIcon}>
-                    <ClipboardList size={16} strokeWidth={2} />
-                  </span>
-                  <div className={styles.historyInfo}>
-                    <p className={styles.historyTitle}>{h.title}</p>
-                    <p className={styles.historyDetail}>{h.detail}</p>
+            {history.length === 0 ? (
+              <p style={emptyText}>Nothing recorded yet. Conditions and allergies you add to your profile appear here.</p>
+            ) : (
+              <div className={styles.historyList}>
+                {history.map((h) => (
+                  <div key={h.type + h.title} className={styles.historyRow}>
+                    <span className={styles.historyIcon}><ClipboardList size={16} strokeWidth={2} /></span>
+                    <div className={styles.historyInfo}>
+                      <p className={styles.historyTitle}>{h.title}</p>
+                      <p className={styles.historyDetail}>{h.detail}</p>
+                    </div>
+                    <span className={`${styles.pill} ${h.type === 'Allergy' ? styles.pillDanger : styles.pillWarn}`}>{h.type}</span>
                   </div>
-                  <span className={`${styles.pill} ${styles[HISTORY_PILL[h.type]]}`}>{h.type}</span>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className={styles.card}>
@@ -170,38 +185,12 @@ export default function PatientPortal() {
               <h2 className={styles.cardTitle}>Information</h2>
             </div>
             <div className={styles.infoList}>
-              <div className={styles.infoRow}>
-                <span className={styles.infoKey}>Gender</span>
-                <span className={styles.infoVal}>Male</span>
-              </div>
-              <div className={styles.infoRow}>
-                <span className={styles.infoKey}>Blood type</span>
-                <span className={styles.infoVal}>O+ (Positive)</span>
-              </div>
-              <div className={styles.infoRow}>
-                <span className={styles.infoKey}>Allergies</span>
-                <span className={styles.infoVal}>Milk, Penicillin</span>
-              </div>
-              <div className={styles.infoRow}>
-                <span className={styles.infoKey}>Diseases</span>
-                <span className={styles.infoVal}>Diabetes, Hypertension</span>
-              </div>
-              <div className={styles.infoRow}>
-                <span className={styles.infoKey}>Height</span>
-                <span className={styles.infoVal}>175 cm</span>
-              </div>
-              <div className={styles.infoRow}>
-                <span className={styles.infoKey}>Weight</span>
-                <span className={styles.infoVal}>72 kg</span>
-              </div>
-              <div className={styles.infoRow}>
-                <span className={styles.infoKey}>Patient ID</span>
-                <span className={styles.infoVal}>208898786</span>
-              </div>
-              <div className={styles.infoRow}>
-                <span className={styles.infoKey}>Last visit</span>
-                <span className={styles.infoVal}>12 Sep 2026</span>
-              </div>
+              {infoRows.map(([key, value]) => (
+                <div key={key} className={styles.infoRow}>
+                  <span className={styles.infoKey}>{key}</span>
+                  <span className={styles.infoVal}>{value || 'Not added'}</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>

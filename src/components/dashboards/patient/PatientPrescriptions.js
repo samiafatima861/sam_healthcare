@@ -1,20 +1,46 @@
 'use client';
 
-import { useState } from 'react';
-import { Pill } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Pill, Download, FileText } from 'lucide-react';
+import { supabase } from '../../../lib/supabaseClient';
+import { prettyDate } from '../../../lib/appointmentUtils';
+import { downloadPrescriptionPdf } from '../../../lib/prescriptionDownload';
 import styles from '../../../assets/styles/PortalPages.module.css';
 
-const PRESCRIPTIONS = [
-  { id: 1, medicine: 'Amlodipine 5mg', dosage: '1 tablet, once daily', doctor: 'Dr. Arjun Mehta', refills: 2, status: 'Active' },
-  { id: 2, medicine: 'Vitamin D3 1000 IU', dosage: '1 capsule, once daily', doctor: 'Dr. Priya Sharma', refills: 1, status: 'Active' },
-  { id: 3, medicine: 'Cetirizine 10mg', dosage: '1 tablet at night, 5 days', doctor: 'Dr. Neha Verma', refills: 0, status: 'Completed' },
-];
+const box = { fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '11px 14px', borderRadius: 'var(--radius-sm)', marginBottom: 14 };
+const boxError = { ...box, color: 'var(--danger-fg)', background: 'var(--danger-bg)' };
+const boxOk = { ...box, color: 'var(--success-fg)', background: 'var(--success-bg)' };
 
 export default function PatientPrescriptions() {
-  const [requested, setRequested] = useState([]);
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [busyId, setBusyId] = useState(null);
+  const [message, setMessage] = useState(null);
 
-  function requestRefill(id) {
-    setRequested((list) => [...list, id]);
+  useEffect(() => {
+    supabase
+      .from('prescriptions')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .then(({ data, error: err }) => {
+        if (err) setError('Could not load your prescriptions. Make sure the patient SQL was run in Supabase.');
+        else setItems(data || []);
+        setLoading(false);
+      });
+  }, []);
+
+  async function download(rx) {
+    setBusyId(rx.id);
+    setMessage(null);
+    try {
+      await downloadPrescriptionPdf(rx.id);
+      setMessage({ type: 'ok', text: 'Your PDF is downloading.' });
+      setTimeout(() => setMessage(null), 3500);
+    } catch (err) {
+      setMessage({ type: 'error', text: err.message });
+    }
+    setBusyId(null);
   }
 
   return (
@@ -22,45 +48,70 @@ export default function PatientPrescriptions() {
       <div className={styles.pageHeader}>
         <div>
           <h1 className={styles.title}>Prescriptions</h1>
-          <p className={styles.subtitle}>Your active medications and refill history.</p>
+          <p className={styles.subtitle}>
+            {loading ? 'Loading your prescriptions...' : 'Everything your doctors have prescribed. Download any of them as a PDF.'}
+          </p>
         </div>
       </div>
 
-      <div className={styles.card}>
-        {PRESCRIPTIONS.map((p) => {
-          const isRequested = requested.includes(p.id);
-          const canRefill = p.status === 'Active' && p.refills > 0;
-          return (
-            <div key={p.id} className={styles.row}>
-              <span className={`${styles.rowIcon} ${p.status === 'Active' ? styles.rowIconTeal : styles.rowIconBlue}`}>
-                <Pill size={17} strokeWidth={2} />
+      {error && <p style={boxError}>{error}</p>}
+      {message && <p style={message.type === 'ok' ? boxOk : boxError} role="status">{message.text}</p>}
+
+      {items.length === 0 ? (
+        <div className={styles.card}>
+          <div className={styles.empty}>
+            <span className={styles.emptyIcon}><FileText size={20} strokeWidth={2} /></span>
+            <p className={styles.emptyTitle}>{loading ? 'Loading...' : 'No prescriptions yet'}</p>
+            <p className={styles.emptyText}>When a doctor prescribes medicine for you, it appears here.</p>
+          </div>
+        </div>
+      ) : (
+        items.map((rx) => (
+          <div key={rx.id} className={styles.card}>
+            <div className={styles.row}>
+              <span className={`${styles.rowIcon} ${styles.rowIconTeal}`}>
+                <FileText size={17} strokeWidth={2} />
               </span>
               <div className={styles.rowInfo}>
-                <p className={styles.rowTitle}>{p.medicine}</p>
-                <p className={styles.rowSub}>{p.dosage} · Prescribed by {p.doctor}</p>
+                <p className={styles.rowTitle}>{rx.doctor_name || 'Your doctor'}</p>
+                <p className={styles.rowSub}>
+                  {prettyDate((rx.created_at || '').slice(0, 10))}
+                  {rx.diagnosis ? ` · Diagnosis: ${rx.diagnosis}` : ''}
+                </p>
               </div>
               <div className={styles.rowRight}>
-                <span className={styles.rowMeta}>
-                  {p.status === 'Active' ? `${p.refills} refill${p.refills === 1 ? '' : 's'} left` : 'Course finished'}
-                </span>
-                <span className={`${styles.pill} ${p.status === 'Active' ? styles.pillGreen : styles.pillGray}`}>
-                  {p.status}
-                </span>
-                {canRefill && (
-                  <button
-                    type="button"
-                    className={styles.btnGhost}
-                    disabled={isRequested}
-                    onClick={() => requestRefill(p.id)}
-                  >
-                    {isRequested ? 'Refill requested' : 'Request refill'}
-                  </button>
-                )}
+                <button type="button" className={styles.btn} disabled={busyId === rx.id} onClick={() => download(rx)}>
+                  <Download size={14} strokeWidth={2.25} />
+                  {busyId === rx.id ? 'Preparing...' : 'Download PDF'}
+                </button>
               </div>
             </div>
-          );
-        })}
-      </div>
+
+            {(rx.medicines || []).map((m, i) => (
+              <div key={i} className={styles.row}>
+                <span className={`${styles.rowIcon} ${styles.rowIconBlue}`}>
+                  <Pill size={17} strokeWidth={2} />
+                </span>
+                <div className={styles.rowInfo}>
+                  <p className={styles.rowTitle}>{m.name}</p>
+                  <p className={styles.rowSub}>
+                    {[m.dosage, m.frequency, m.duration].filter(Boolean).join(' · ') || 'No details given'}
+                  </p>
+                </div>
+              </div>
+            ))}
+
+            {rx.instructions && (
+              <div className={styles.row}>
+                <div className={styles.rowInfo}>
+                  <p className={styles.rowSub}>Instructions</p>
+                  <p className={styles.rowTitle} style={{ fontWeight: 500, whiteSpace: 'pre-wrap' }}>{rx.instructions}</p>
+                </div>
+              </div>
+            )}
+          </div>
+        ))
+      )}
     </div>
   );
 }

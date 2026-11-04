@@ -1,4 +1,5 @@
 import '../assets/styles/globals.css';
+import { ToastProvider } from '../components/ToastProvider';
 
 export const metadata = {
   title: 'Sam Healthcare — Hospital & specialist care, booked in minutes',
@@ -9,7 +10,9 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <ToastProvider>{children}</ToastProvider>
+      </body>
     </html>
   );
 }
